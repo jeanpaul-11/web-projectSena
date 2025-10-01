@@ -6,8 +6,8 @@ class EmailService:
     def __init__(self):
         self.smtp_server = "smtp.gmail.com"
         self.smtp_port = 587
-        self.sender_email = "tu_correo@gmail.com"  # Cambia esto por tu correo
-        self.sender_password = "tu_contraseña_de_aplicacion"  # Cambia esto por tu contraseña de aplicación de Gmail
+        self.sender_email = "jeanmillosyeye@gmail.com"  # Cambia esto por tu correo
+        self.sender_password = "iptv hpgp jueb xout"  # Cambia esto por tu contraseña de aplicación de Gmail
 
     def enviar_correo_recuperacion(self, destinatario, token):
         try:
