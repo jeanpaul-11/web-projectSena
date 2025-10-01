@@ -1,0 +1,11 @@
+Flask==2.3.3
+Werkzeug==3.1.3
+Jinja2==3.1.6
+click==8.3.0
+itsdangerous==2.2.0
+MarkupSafe==3.0.2
+blinker==1.9.0
+python-dotenv==1.0.0    # Para variables de entorno
+email-validator==2.0.0   # Para validación de emails
+flask-sqlalchemy==3.1.1  # ORM para SQLite
+flask-cors==4.0.0

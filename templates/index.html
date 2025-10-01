@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Start your development with Pigga landing page.">
+    <meta name="author" content="Devcrud">
+    <title>JP restaurant</title>
+    <!-- font icons -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
+    <!-- Bootstrap + Pigga main styles -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pigga.css')}}">
+    <style>
+        .logo {
+            width: 300px;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 50%;
+            -webkit-mask-image: radial-gradient(ellipse at center, 
+                black 45%, 
+                rgba(0, 0, 0, 0.7) 50%,
+                rgba(0, 0, 0, 0.5) 55%,
+                rgba(0, 0, 0, 0.2) 60%,
+                transparent 70%);
+            mask-image: radial-gradient(ellipse at center, 
+                black 45%, 
+                rgba(0, 0, 0, 0.7) 50%,
+                rgba(0, 0, 0, 0.5) 55%,
+                rgba(0, 0, 0, 0.2) 60%,
+                transparent 70%);
+        }
+    </style>
+</head>
+<body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
+    
+    <!-- Second Navigation -->
+    <nav class="nav-second navbar custom-navbar navbar-expand-sm navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto"> 
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">Nosotros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#service">Nuestros servicios</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#team">Nuestro equipo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-primary">Contactanos : <span class="pl-2 text-muted">(57) 305 500 55 60</span></a>
+                    </li>   
+                </ul> 
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">Entrar</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- End Of Second Navigation --> 
+    <!-- Page Header -->
+    <header class="header">
+        <div class="overlay">
+            <img src="{{ url_for('static', filename='assets/imgs/logoShort.PNG')}}" class="logo">
+            <h1 class="subtitle">Bienvenidos a nuestro restaurante</h1>
+            <h1 class="title">JP gourmet have restaurant</h1> 
+            <a class="btn btn-primary mt-3" href="{{ url_for('login') }}">Reservar una mesa</a> 
+        </div>      
+    </header>
+    <!-- End Of Page Header --> 
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <div class="row align-items-center">                
+                <div class="col-md-6">
+                    <h3 class="section-title">Horarios</h3>
+                    <p class="mb-1 font-weight-bold">Lunes - Viernes : <span class="font-weight-normal pl-2 text-muted">7:00 am - 8:00 pm</span></p>
+                    <p class="mb-1 font-weight-bold">Sabado - Domingo : <span class="font-weight-normal pl-2 text-muted">7:00 am - 12:00 pm</span></p>
+                    <p class="mb-1 font-weight-bold">Festivos : <span class="font-weight-normal pl-2 text-muted">7:00 am - 8:00 pm</span></p>
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm w-md mt-4">Reservar una mesa</a>
+                </div>
+                <div class="col-md-6">
+                    <div class="row">
+                        <div class="col">
+                            <img src="{{ url_for('static', filename='assets/imgs/about-1.jpg')}}" class="w-100 rounded shadow">
+                        </div>
+                        <div class="col">
+                            <img src="{{ url_for('static', filename='assets/imgs/about-2.jpg')}}" class="w-100 rounded shadow">
+                        </div>
+                    </div>                  
+                </div>
+            </div>
+            <div class="section-devider my-6 transparent"></div>
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h6 class="section-subtitle">La gran historia</h6>
+                    <h3 class="section-title">Nuestro viaje culinario</h3>
+                    <p>Desde nuestros inicios hemos soñado con crear un espacio donde la buena mesa y los momentos especiales se encuentren. En cada plato ponemos dedicación, frescura e inspiración, mezclando tradición y creatividad para ofrecer una experiencia única.</p>
+                </div>
+                <div class="col-md-6 order-1 order-sm-first">
+                    <div class="row">
+                        <div class="col">
+                            <img src="{{ url_for('static', filename='assets/imgs/about-3.jpg')}}" class="w-100 rounded shadow">
+                        </div>
+                        <div class="col">
+                            <img src="{{ url_for('static', filename='assets/imgs/about-4.jpg')}}" class="w-100 rounded shadow">
+                        </div>
+                    </div>                  
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End OF About Section -->
+
+    <!-- Service Section -->
+    <section id="service" class="pattern-style-4 has-overlay">
+        <div class="container raise-2">
+            <h3 class="section-title mb-6 pb-3 text-center">Platos especiales</h3>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <a href="javascrip:void(0)" class="custom-list">
+                        <div class="img-holder">
+                            <img src="{{url_for('static', filename='assets/imgs/plato1.png')}}">
+                        </div>
+                        <div class="info">
+                            <div class="head clearfix">
+                                <h5 class="title float-left">Filete Wagyu en Salsa de Trufa Negra</h5>
+                                <p class="float-right text-primary">COP 120.000</p>
+                            </div>
+                            <div class="body">
+                                <p>Exquisito corte de carne Wagyu A5 sellado a la perfección, acompañado de reducción de vino tinto y terminado con una delicada salsa de trufa negra. Servido con puré de papas cremoso y espárragos tiernos.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <a href="javascrip:void(0)" class="custom-list">
+                        <div class="img-holder">
+                            <img src="{{ url_for('static', filename='assets/imgs/plato2.png')}}">
+                        </div>
+                        <div class="info">
+                            <div class="head clearfix">
+                                <h5 class="title float-left">Langosta Thermidor</h5>
+                                <p class="float-right text-primary">COP 150.000</p>
+                            </div>
+                            <div class="body">
+                                <p>Langosta fresca gratinada con salsa de vino blanco, mostaza Dijon y queso Gruyère. Servida con un toque de azafrán y vegetales baby salteados en mantequilla.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <a href="javascrip:void(0)" class="custom-list">
+                        <div class="img-holder">
+                            <img src="{{ url_for('static', filename='assets/imgs/plato3.png')}}">
+                        </div>
+                        <div class="info">
+                            <div class="head clearfix">
+                                <h5 class="title float-left">Tomahawk Dry Aged 45 Días</h5>
+                                <p class="float-right text-primary">COP 150.000</p>
+                            </div>
+                            <div class="body">
+                                <p>Imponente corte Tomahawk madurado en seco, sellado en carbón de encina. Acompañado de papas rústicas al romero y salsa chimichurri de la casa.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <a href="javascrip:void(0)" class="custom-list">
+                        <div class="img-holder">
+                            <img src="{{ url_for('static', filename='assets/imgs/plato4.png')}}">
+                        </div>
+                        <div class="info">
+                            <div class="head clearfix">
+                                <h5 class="title float-left">Lubina al Horno con Cítricos</h5>
+                                <p class="float-right text-primary">COP 140.000</p>
+                            </div>
+                            <div class="body">
+                                <p>Lubina fresca horneada lentamente con ralladura de limón, naranja y finas hierbas, servida sobre una cama de risotto de espárragos y mantequilla clarificada.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <a href="javascrip:void(0)" class="custom-list">
+                        <div class="img-holder">
+                            <img src="{{ url_for('static', filename='assets/imgs/plato5.png')}}">
+                        </div>
+                        <div class="info">
+                            <div class="head clearfix">
+                                <h5 class="title float-left">Ostras Rockefeller</h5>
+                                <p class="float-right text-primary">COP 180.000</p>
+                            </div>
+                            <div class="body">
+                                <p>Ostras frescas al horno con espinaca, mantequilla, pan rallado y un toque de Pernod flameado. Un clásico de la alta cocina francesa.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <a href="javascrip:void(0)" class="custom-list">
+                        <div class="img-holder">
+                            <img src="{{ url_for('static', filename='assets/imgs/plato6.png')}}">
+                        </div>
+                        <div class="info">
+                            <div class="head clearfix">
+                                <h5 class="title float-left">Magret de Pato con Reducción de Oporto</h5>
+                                <p class="float-right text-primary">COP 170.0000</p>
+                            </div>
+                            <div class="body">
+                                <p>Pechuga de pato cocinada a la perfección, con piel crujiente y jugosa carne rosada. Servida con reducción de vino de Oporto, puré de calabaza y peras caramelizadas.</p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>                  
+        </div>
+    </section>
+    <!-- End of Featured Food Section -->
+
+    <!-- Menu Section -->
+    <section class="has-img-bg">
+        <div class="container">
+            <h3 class="section-title mb-6 text-center">Menu principal</h3>
+            <div class="card bg-light">
+                <div class="card-body px-4 pb-4 text-center">                   
+                    <div class="row text-left">
+                        <div class="col-md-6 my-4">
+                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        Hamburguesa de Angus
+                                        <p class="mt-1 mb-0">Hamburguesa con carne angus 100 gr, pan brioche, mix de quesos cremosos de la casa, doble tocineta, tomate dulce y cebolla.</p>
+                                    </div>
+                                    <h6 class="float-right text-primary">COP 25.000</h6>
+                                </div>                            
+                            </a>
+                        </div>
+                        <div class="col-md-6 my-4">
+                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        Pizza con champiñones 
+                                        <p class="mt-1 mb-0">Con champiñones, incluye únicamente queso y la salsa de tomate.</p>
+                                    </div>
+                                    <h6 class="float-right text-primary">COP 15.000</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6 my-4">
+                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        La Glotona
+                                        <p class="mt-1 mb-0">Hamburguesa con triple carne artesanal, pan brioche, triple queso cheddar, tocineta, lechuga, tomate, cebolla, pepinillos y salsa de la casa.</p>
+                                    </div>
+                                    <h6 class="float-right text-primary">COP 30.0000</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6 my-4">
+                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        Perro doble 
+                                        <p class="mt-2 mb-0">Hot dog con doble salchicha zenu, pan artesanal, dos huevos de codorniz, queso, jamón, salsas de la casa, cebolla y papitas chip.</p>
+                                    </div>
+                                    <h6 class="float-right text-primary">COP 17.500</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6 my-4">
+                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        Costillas de cerdo al horno
+                                        <p class="mt-2 mb-0">Cosillas de cerdo cocinadas al horno, acompañadas con salsa de la casa, ensalada verde y con papas en cascos.</p>
+                                    </div>
+                                    <h6 class="float-right text-primary">COP 30.000</h6>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6 my-4">
+                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                                <div class="d-flex">
+                                    <div class="flex-grow-1">
+                                        Chuletas de cerdo a la plancha
+                                        <p class="mt-2 mb-0">Chuletas bañadas en salsas verdes, acompañadas con papas fritas.</p>
+                                    </div>
+                                    <h6 class="float-right text-primary">COP 25.0000</h6>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('login') }}" class="btn btn-primary mt-4">Reservar</a>
+                </div>
+            </div>                  
+        </div>
+    </section>
+    <!-- End of Menu Section -->
+
+    <!-- Team Section -->
+    <section id="team">
+        <div class="container">
+            <h3 class="section-title mb-5 text-center">Nuestros Chefs</h3>
+            <div class="row">
+                <div class="col-md-4 my-3">
+                    <div class="team-wrapper text-center">
+                        <img src="{{ url_for('static', filename='assets/imgs/chef-1.jpg')}}" class="circle-120 rounded-circle mb-3 shadow" alt="Download free bootstrap 4 landing page, free boootstrap 4 templates, Download free bootstrap 4.1 landing page, free boootstrap 4.1.1 templates, Pigga Landing page">
+                        <h5 class="my-3">Brian Ramirez</h5>
+                        <p>Experto en cortes magros en res, pollo, en parrilla como en horno</p>
+                    </div>
+                </div>
+                <div class="col-md-4 my-3">
+                    <div class="team-wrapper text-center">
+                        <img src="{{ url_for('static', filename='assets/imgs/chef-2.jpg')}}" class="circle-120 rounded-circle mb-3 shadow" alt="Download free bootstrap 4 landing page, free boootstrap 4 templates, Download free bootstrap 4.1 landing page, free boootstrap 4.1.1 templates, Pigga Landing page">
+                        <h5 class="my-3">Edward Harris</h5>
+                        <p>Con una estrella michellin, el jefe en la cocina ya que su amplia experiencia en diferentes campos culinarios</p>
+                    </div>
+                </div>
+                <div class="col-md-4 my-3">
+                    <div class="team-wrapper text-center">
+                        <img src="{{ url_for('static', filename='assets/imgs/chef-3.jpg')}}" class="circle-120 rounded-circle mb-3 shadow" alt="Download free bootstrap 4 landing page, free boootstrap 4 templates, Download free bootstrap 4.1 landing page, free boootstrap 4.1.1 templates, Pigga Landing page">
+                        <h5 class="my-3">Ricardo Puentes</h5>
+                        <p>Nuestro profesional en comida de mar, su especialidad son las langostas y el salmon</p>
+                    </div>
+                </div> 
+            </div>
+        </div>
+    </section>
+    <!-- End of Team Section -->
+
+    <!-- Page Footer -->
+    <footer class="border border-dark border-left-0 border-right-0 border-bottom-0 p-4 bg-dark">
+        <div class="container">
+            <div class="row align-items-center text-center text-md-left">
+                <div class="footer-text">
+                    <p class="mb-0 small">&copy; <script>document.write(new Date().getFullYear())</script>, Jean Paul All rights reserved</p>
+                </div>
+            </div>
+        </div>
+        
+    </footer>
+    <!-- End of Page Footer -->
+
+    <!-- core  -->
+    <script src="assets/vendors/jquery/jquery-3.4.1.js"></script>
+    <script src="assets/vendors/bootstrap/bootstrap.bundle.js"></script>
+
+    <!-- bootstrap affix -->
+    <script src="assets/vendors/bootstrap/bootstrap.affix.js"></script>
+
+    <!-- Pigga js -->
+    <script src="assets/js/pigga.js"></script>
+
+</body>
+</html>

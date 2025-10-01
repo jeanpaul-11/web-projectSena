@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Reserva tu mesa en JP restaurant">
+    <meta name="author" content="Devcrud">
+    <title>Reservas - JP restaurant</title>
+    <!-- font icons -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
+    <!-- Bootstrap + Pigga main styles -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pigga.css')}}">
+    <style>
+        
+    </style>
+</head>
+<body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
+    
+    <!-- Second Navigation -->
+    <nav class="nav-second navbar custom-navbar navbar-expand-sm navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto"> 
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-primary">Contactanos : <span class="pl-2 text-muted">(57) 305 500 55 60</span></a>
+                    </li>   
+                </ul> 
+            </div>
+        </div>
+    </nav>
+    <!-- End Of Second Navigation --> 
+
+    <section id="book-table" class="bg-white has-img-bg">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 d-none d-md-block">
+                    <img src="{{ url_for('static', filename='assets/imgs/contact.jpg')}}" class="w-100 rounded shadow">
+                </div>
+                <div class="col-md-6">
+                    <h3 class="section-title mb-4">Reserva tu mesa</h3>
+                    <form id="reservaForm">
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Tu nombre" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="tel" class="form-control" name="phone" placeholder="Tu teléfono" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="date" class="form-control" name="fecha" required>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" name="hora" required>
+                                <option value="" disabled selected>Hora</option>
+                                <option value="07:00">7:00 AM</option>
+                                <option value="07:30">7:30 AM</option>
+                                <option value="08:00">8:00 AM</option>
+                                <option value="08:30">8:30 AM</option>
+                                <option value="09:00">9:00 AM</option>
+                                <option value="09:30">9:30 AM</option>
+                                <option value="10:00">10:00 AM</option>
+                                <option value="10:30">10:30 AM</option>
+                                <option value="11:00">11:00 AM</option>
+                                <option value="11:30">11:30 AM</option>
+                                <option value="12:00">12:00 PM</option>
+                                <option value="12:00">13:00 PM</option>
+                                <option value="12:00">13:30 PM</option>
+                                <option value="12:00">14:00 PM</option>
+                                <option value="12:00">14:30 PM</option>
+                                <option value="12:00">15:00 PM</option>
+                                <option value="12:00">15:30 PM</option>
+                                <option value="12:00">16:00 PM</option>
+                                <option value="12:00">16:30 PM</option>
+                                <option value="12:00">17:00 PM</option>
+                                <option value="12:00">17:30 PM</option>
+                                <option value="12:00">18:00 PM</option>
+                                <option value="12:00">18:30 PM</option>
+                                <option value="12:00">19:00 PM</option>
+                                <option value="12:00">19:30 PM</option>
+                                <option value="12:00">20:00 PM</option>
+                                <option value="12:00">20:30 PM</option>
+                            </select>
+                        </div>
+                        <style>
+                            select.form-control {
+                                background-color: #fff !important;
+                                color: #495057 !important;
+                            }
+                            select.form-control option {
+                                background-color: #fff !important;
+                                color: #495057 !important;
+                            }
+                            select.form-control option:first-child {
+                                color: #6c757d !important;
+                            }
+                            #platosSection {
+                                display: none;
+                            }
+                            #platosSection.show {
+                                display: block;
+                            }
+                        </style>
+                        <div class="form-group">
+                            <input type="number" class="form-control" name="num_personas" placeholder="Número de personas" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <button type="button" class="btn btn-info btn-block mb-3" onclick="togglePlatosSection()">¿Deseas agregar platos a tu reserva?</button>
+                        </div>
+
+                        <!-- Sección de platos -->
+                        <div id="platosSection">
+                            <h4 class="mb-3">Selecciona tus platos:</h4>
+                            <div class="platos-lista">
+                                <div class="plato-item mb-3 border-bottom pb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5>Hamburguesa de Angus</h5>
+                                            <p class="mb-1">Hamburguesa con carne angus 100 gr, pan brioche, mix de quesos cremosos</p>
+                                            <p class="text-primary">COP 25.000</p>
+                                        </div>
+                                        <div>
+                                            <input type="number" min="0" value="0" class="form-control plato-cantidad" 
+                                                   data-id="1"
+                                                   data-nombre="Hamburguesa de Angus" 
+                                                   data-precio="25000">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="plato-item mb-3 border-bottom pb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5>Pizza con champiñones</h5>
+                                            <p class="mb-1">Con champiñones, incluye únicamente queso y la salsa de tomate</p>
+                                            <p class="text-primary">COP 15.000</p>
+                                        </div>
+                                        <div>
+                                            <input type="number" min="0" value="0" class="form-control plato-cantidad" 
+                                                   data-id="2"
+                                                   data-nombre="Pizza con champiñones" 
+                                                   data-precio="15000">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="plato-item mb-3 border-bottom pb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5>La Glotona</h5>
+                                            <p class="mb-1">Hamburguesa con triple carne artesanal, pan brioche, triple queso cheddar</p>
+                                            <p class="text-primary">COP 30.000</p>
+                                        </div>
+                                        <div>
+                                            <input type="number" min="0" value="0" class="form-control plato-cantidad" 
+                                                   data-id="3"
+                                                   data-nombre="La Glotona" 
+                                                   data-precio="30000">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">Reservar una mesa</button>
+                        <div id="mensajeReserva" class="alert mt-3" style="display: none;"></div>
+                        <small class="form-text text-muted mt-3">No compartimos información sobre nuestros clientes. Consulta nuestra <a href="#">Política de privacidad</a></small>
+                    </form>
+
+                    <!-- Ventana de confirmación superpuesta -->
+                    <div id="ventanaConfirmacion" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        background: #1a1a1a; color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); 
+                        z-index: 1000; width: 90%; max-width: 500px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h5 style="margin: 0; color: white;">Confirma tu reserva</h5>
+                            <button onclick="cerrarVentana()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: white;">&times;</button>
+                        </div>
+                        
+                        <div class="detalles-reserva">
+                            <h6 style="color: white;">Detalles de la reserva:</h6>
+                            <div id="detallesReserva" class="mb-3" style="color: #ffffff;">
+                                <!-- Los detalles se insertarán aquí -->
+                            </div>
+                            
+                            <div id="platosSeleccionados">
+                                <h6 style="color: white;">Platos seleccionados:</h6>
+                                <ul id="listaPlatosSeleccionados" class="list-unstyled" style="color: #ffffff;"></ul>
+                                <p class="font-weight-bold" style="color: white;">Total: <span id="totalPedido"></span></p>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                            <button class="btn btn-danger" onclick="cerrarVentana()">Cancelar</button>
+                            <button class="btn btn-primary" onclick="confirmarReserva()">Confirmar</button>
+                        </div>
+                    </div>
+
+                    <!-- Fondo oscuro -->
+                    <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
+                        background: rgba(0,0,0,0.7); z-index: 999;"></div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="reservaExitosaModal" tabindex="-1" aria-labelledby="reservaExitosaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content text-center">
+            <div class="modal-header">
+              <h5 class="modal-title w-100" id="reservaExitosaLabel">Reserva realizada</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+              <p class="mb-0">¡Reserva realizada con éxito!</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <!-- Page Footer -->
+    <footer class="border border-dark border-left-0 border-right-0 border-bottom-0 p-4 bg-dark">
+        <div class="container">
+            <div class="row align-items-center text-center text-md-left">
+                <div class="footer-text">
+                    <p class="mb-0 small">&copy; <script>document.write(new Date().getFullYear())</script>, Jean Paul All rights reserved</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- End of Page Footer -->
+
+    <!-- core  -->
+    <script src="{{ url_for('static', filename='assets/vendors/jquery/jquery-3.4.1.js')}}"></script>
+    <script src="{{ url_for('static', filename='assets/vendors/bootstrap/bootstrap.bundle.js')}}"></script>
+
+    <!-- bootstrap affix -->
+    <script src="{{ url_for('static', filename='assets/vendors/bootstrap/bootstrap.affix.js')}}"></script>
+
+    <!-- Pigga js -->
+    <script src="{{ url_for('static', filename='assets/js/pigga.js')}}"></script>
+
+    <script>
+        function togglePlatosSection() {
+            const platosSection = document.getElementById('platosSection');
+            const isExpanding = !platosSection.classList.contains('show');
+            
+            platosSection.classList.toggle('show');
+            
+            if (isExpanding) {
+                platosSection.style.display = 'block';
+                setTimeout(() => {
+                    window.scrollTo({
+                        top: platosSection.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                }, 300);
+            }
+        }
+
+        function obtenerPlatosSeleccionados() {
+            const platos = [];
+            document.querySelectorAll('.plato-cantidad').forEach(input => {
+                if (input.value > 0) {
+                    platos.push({
+                        id: parseInt(input.dataset.id), // ID del plato en la base de datos
+                        cantidad: parseInt(input.value),
+                        precio: parseInt(input.dataset.precio),
+                        total: parseInt(input.value) * parseInt(input.dataset.precio)
+                    });
+                }
+            });
+            return platos;
+        }
+
+        function mostrarModal(formData) {
+            const platos = obtenerPlatosSeleccionados();
+            let totalPedido = 0;
+
+            // Mostrar detalles de la reserva
+            const detallesHtml = `
+                <p><strong>Nombre:</strong> ${formData.get('name')}</p>
+                <p><strong>Teléfono:</strong> ${formData.get('phone')}</p>
+                <p><strong>Fecha:</strong> ${formData.get('fecha')}</p>
+                <p><strong>Hora:</strong> ${formData.get('hora')}</p>
+                <p><strong>Personas:</strong> ${formData.get('num_personas')}</p>
+            `;
+            document.getElementById('detallesReserva').innerHTML = detallesHtml;
+
+            // Mostrar platos seleccionados
+            const listaPlatos = document.getElementById('listaPlatosSeleccionados');
+            listaPlatos.innerHTML = '';
+            
+            platos.forEach(plato => {
+                const input = document.querySelector(`.plato-cantidad[data-id="${plato.id}"]`);
+                const nombre = input.dataset.nombre;
+                const total = plato.cantidad * plato.precio;
+                totalPedido += total;
+                
+                const li = document.createElement('li');
+                li.textContent = `${nombre} x${plato.cantidad} - COP ${total.toLocaleString()}`;
+                listaPlatos.appendChild(li);
+            });
+
+            document.getElementById('totalPedido').textContent = `COP ${totalPedido.toLocaleString()}`;
+            
+            // Mostrar la ventana y el overlay
+            document.getElementById('ventanaConfirmacion').style.display = 'block';
+            document.getElementById('overlay').style.display = 'block';
+        }
+
+        function cerrarVentana() {
+            document.getElementById('ventanaConfirmacion').style.display = 'none';
+            document.getElementById('overlay').style.display = 'none';
+        }
+
+        document.getElementById('reservaForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            mostrarModal(formData);
+        });
+
+        document.getElementById('reservaExitosaModal').addEventListener('hidden.bs.modal', function () {
+            window.location.href = '/clientes';
+        });
+
+        async function confirmarReserva() {
+            const formData = new FormData(document.getElementById('reservaForm'));
+            const platos = obtenerPlatosSeleccionados();
+            
+            const data = {
+                fecha: formData.get('fecha'),
+                hora: formData.get('hora'),
+                num_personas: parseInt(formData.get('num_personas')),
+                platos: platos
+            };
+
+            try {
+                const response = await fetch('/api/reservas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+                const mensajeDiv = document.getElementById('mensajeReserva');
+                
+                if (response.ok) {
+                    mensajeDiv.className = 'alert alert-success mt-3';
+                    mensajeDiv.textContent = '¡Reserva realizada con éxito!';
+                    cerrarVentana();
+
+                    const modal = new bootstrap.Modal(document.getElementById('reservaExitosaModal'));
+                    modal.show();
+                    //TODO: arreglar esto...... no se muestra el modal
+
+                    document.getElementById('btnAceptar').onclick = window.location.href = "{{ url_for('clientes') }}";;
+                    // Cuando haga clic en el overlay (fuera del modal)
+                    document.getElementById('overlay').onclick = window.location.href = "{{ url_for('clientes') }}";;
+
+                } else {
+                    mensajeDiv.className = 'alert alert-danger mt-3';
+                    mensajeDiv.textContent = result.error || 'Error al realizar la reserva';
+                }
+                mensajeDiv.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                const mensajeDiv = document.getElementById('mensajeReserva');
+                mensajeDiv.className = 'alert alert-danger mt-3';
+                mensajeDiv.textContent = 'Error al conectar con el servidor';
+                mensajeDiv.style.display = 'block';
+            }
+        }
+    </script>
+
+</body>
+</html>

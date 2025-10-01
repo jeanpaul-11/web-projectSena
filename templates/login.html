@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/stylesLogin.css') }}">
+    <title>Registro</title>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="form-container sign-in-container">
+            <form action="#">
+                <h1>Ingresa</h1>
+                <input type="email" id="email" color="white" placeholder="Correo electrónico" />
+                <input type="password" id="clave" color="white" placeholder="Clave" />
+                <a href="{{ url_for('olvidar_contrasena')}} ">Olvidaste tu contraseña?</a>
+                <button type="button" onclick="sendCredentialsAccess()">Ingresar</button>
+                <!-- Botón móvil que solo aparece cuando el overlay está oculto -->
+                <div class="mobile-signup">
+                    <p>¿No tienes una cuenta?</p>
+                    <button type="button" class="ghost mobile-only" onclick="window.location.href='{{ url_for('registrarse') }}'">Registrarme</button>
+                </div>
+            </form>
+        </div>
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-right">
+                    <h1>Hola!</h1>
+                    <p style="text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);">Ingresa tus datos para crear tu cuenta</p>
+                    <button class="ghost" id="signUp">Registrarme</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    async function sendCredentialsAccess() {
+        const url = '/api/sendCredentialsAccess';
+        const correo = document.getElementById('email').value;
+        const clave = document.getElementById('clave').value;
+        const data = {
+            correo: correo,
+            clave: clave
+        };
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            if (result.status === "success") {
+                if (result.data.tipo_usuario === "0") {
+                    window.location.href = '/clientes';
+                } else if (result.data.tipo_usuario === "1") {
+                    window.location.href = '/empleado';
+                } else if (result.data.tipo_usuario === "2") {
+                    window.location.href = '/admin';
+                }
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al iniciar sesión');
+        }
+    }
+
+    document.getElementById('signUp').addEventListener('click', function() {
+        window.location.href = "{{ url_for('registrarse') }}";
+    });
+</script>
+</html>
