@@ -1,152 +1,174 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-	<meta charset="utf-8">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <!-- font icons -->
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
     <!-- Bootstrap + Pigga main styles -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pigga.css')}}">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: url("{{ url_for('static', filename='assets/imgs/logoShort.PNG') }}") no-repeat center center fixed;
-            background-size: cover;
-            position: relative;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: -1;
-        }
-        .logo {
-            width: 300px;
-            height: 300px;
-            object-fit: contain;
-            border-radius: 50%;
-            -webkit-mask-image: radial-gradient(ellipse at center, 
-                black 45%, 
-                rgba(0, 0, 0, 0.7) 50%,
-                rgba(0, 0, 0, 0.5) 55%,
-                rgba(0, 0, 0, 0.2) 60%,
-                transparent 70%);
-            mask-image: radial-gradient(ellipse at center, 
-                black 45%, 
-                rgba(0, 0, 0, 0.7) 50%,
-                rgba(0, 0, 0, 0.5) 55%,
-                rgba(0, 0, 0, 0.2) 60%,
-                transparent 70%);
-        }
-
-        /* Estilos para el modal de edición de perfil */
-        .modal-perfil {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-perfil .modal-content {
-            background-color: #2c2c2c;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-            animation: slideIn 0.3s ease;
-            color: white;
-        }
-
-        .modal-perfil .close {
-            position: absolute;
-            right: 20px;
-            top: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            color: #fff;
-            transition: color 0.3s ease;
-        }
-
-        .modal-perfil .close:hover {
-            color: #bc8c4c;
-        }
-
-        .modal-perfil .form-group {
-            margin-bottom: 15px;
-        }
-
-        .modal-perfil .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #fff;
-            font-weight: 500;
-        }
-
-        .modal-perfil .form-group input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #bc8c4c;
-            border-radius: 4px;
-            font-size: 1rem;
-            background-color: #333;
-            color: white;
-            transition: border-color 0.3s ease;
-        }
-
-        .modal-perfil .form-group input:focus {
-            border-color: #d4a017;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(188,140,76,0.25);
-        }
-
-        .modal-perfil .botones {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pigga.css')}}">
 </head>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: url("{{ url_for('static', filename='assets/imgs/logoShort.PNG') }}") no-repeat center center fixed;
+        background-size: cover;
+        position: relative;
+    }
+
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: -1;
+    }
+
+    .logo {
+        width: 300px;
+        height: 300px;
+        object-fit: contain;
+        border-radius: 50%;
+        -webkit-mask-image: radial-gradient(ellipse at center,
+                black 45%,
+                rgba(0, 0, 0, 0.7) 50%,
+                rgba(0, 0, 0, 0.5) 55%,
+                rgba(0, 0, 0, 0.2) 60%,
+                transparent 70%);
+        mask-image: radial-gradient(ellipse at center,
+                black 45%,
+                rgba(0, 0, 0, 0.7) 50%,
+                rgba(0, 0, 0, 0.5) 55%,
+                rgba(0, 0, 0, 0.2) 60%,
+                transparent 70%);
+    }
+
+    /* Estilos para el modal de edición de perfil */
+    .modal-perfil {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .modal-perfil .modal-content {
+        background-color: #2c2c2c;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        animation: slideIn 0.3s ease;
+        color: white;
+    }
+
+    .modal-perfil .close {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        color: #fff;
+        transition: color 0.3s ease;
+    }
+
+    .modal-perfil .close:hover {
+        color: #bc8c4c;
+    }
+
+    .modal-perfil .form-group {
+        margin-bottom: 15px;
+    }
+
+    .modal-perfil .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        color: #fff;
+        font-weight: 500;
+    }
+
+    .modal-perfil .form-group input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #bc8c4c;
+        border-radius: 4px;
+        font-size: 1rem;
+        background-color: #333;
+        color: white;
+        transition: border-color 0.3s ease;
+    }
+
+    .modal-perfil .form-group input:focus {
+        border-color: #d4a017;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(188, 140, 76, 0.25);
+    }
+
+    .modal-perfil .botones {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+</style>
+
 <body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
-    
+
     <!-- Second Navigation -->
     <nav class="nav-second navbar custom-navbar navbar-expand-sm navbar-dark bg-dark sticky-top">
         <div class="container">
-            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav mr-auto"> 
+                <ul class="navbar-nav mr-auto">
                     <li class="nav-item">
-                        <a class="nav-link text-primary">Contactanos : <span class="pl-2 text-muted">(57) 305 500 55 60</span></a>
-                    </li>   
-                </ul> 
+                        <a class="nav-link text-primary">Contactanos : <span class="pl-2 text-muted">(57) 305 500 55
+                                60</span></a>
+                    </li>
+                </ul>
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a href="{{ url_for('reservas') }}" class="btn btn-primary btn-sm mr-2">Reservar</a>
+                    </li>
+                    <li class="nav-item">
+                        <button onclick="abrirModalPerfil()" class="btn btn-primary btn-sm mr-2">Editar perfil</button>
                     </li>
                     <li class="nav-item">
                         <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">Cerrar Sesión</button>
@@ -155,17 +177,17 @@
             </div>
         </div>
     </nav>
-    <!-- End Of Second Navigation --> 
+    <!-- End Of Second Navigation -->
 
     <!-- Header con logo -->
     <header class="header">
         <div class="overlay">
             <img src="{{ url_for('static', filename='assets/imgs/logoShort.PNG')}}" class="logo">
             <h1 class="subtitle">Bienvenido a tu panel de cliente</h1>
-            <h1 class="title">JP gourmet have restaurant</h1> 
-        </div>      
+            <h1 class="title">JP gourmet have restaurant</h1>
+        </div>
     </header>
-    <!-- End Of Header --> 
+    <!-- End Of Header -->
 
     <!-- Service Section -->
     <section id="platos-especiales" class="pattern-style-4 has-overlay">
@@ -183,7 +205,9 @@
                                 <p class="float-right text-primary">COP 120.000</p>
                             </div>
                             <div class="body">
-                                <p>Exquisito corte de carne Wagyu A5 sellado a la perfección, acompañado de reducción de vino tinto y terminado con una delicada salsa de trufa negra. Servido con puré de papas cremoso y espárragos tiernos.</p>
+                                <p>Exquisito corte de carne Wagyu A5 sellado a la perfección, acompañado de reducción de
+                                    vino tinto y terminado con una delicada salsa de trufa negra. Servido con puré de
+                                    papas cremoso y espárragos tiernos.</p>
                             </div>
                         </div>
                     </a>
@@ -199,7 +223,8 @@
                                 <p class="float-right text-primary">COP 150.000</p>
                             </div>
                             <div class="body">
-                                <p>Langosta fresca gratinada con salsa de vino blanco, mostaza Dijon y queso Gruyère. Servida con un toque de azafrán y vegetales baby salteados en mantequilla.</p>
+                                <p>Langosta fresca gratinada con salsa de vino blanco, mostaza Dijon y queso Gruyère.
+                                    Servida con un toque de azafrán y vegetales baby salteados en mantequilla.</p>
                             </div>
                         </div>
                     </a>
@@ -215,7 +240,8 @@
                                 <p class="float-right text-primary">COP 150.000</p>
                             </div>
                             <div class="body">
-                                <p>Imponente corte Tomahawk madurado en seco, sellado en carbón de encina. Acompañado de papas rústicas al romero y salsa chimichurri de la casa.</p>
+                                <p>Imponente corte Tomahawk madurado en seco, sellado en carbón de encina. Acompañado de
+                                    papas rústicas al romero y salsa chimichurri de la casa.</p>
                             </div>
                         </div>
                     </a>
@@ -231,7 +257,8 @@
                                 <p class="float-right text-primary">COP 140.000</p>
                             </div>
                             <div class="body">
-                                <p>Lubina fresca horneada lentamente con ralladura de limón, naranja y finas hierbas, servida sobre una cama de risotto de espárragos y mantequilla clarificada.</p>
+                                <p>Lubina fresca horneada lentamente con ralladura de limón, naranja y finas hierbas,
+                                    servida sobre una cama de risotto de espárragos y mantequilla clarificada.</p>
                             </div>
                         </div>
                     </a>
@@ -247,7 +274,8 @@
                                 <p class="float-right text-primary">COP 180.000</p>
                             </div>
                             <div class="body">
-                                <p>Ostras frescas al horno con espinaca, mantequilla, pan rallado y un toque de Pernod flameado. Un clásico de la alta cocina francesa.</p>
+                                <p>Ostras frescas al horno con espinaca, mantequilla, pan rallado y un toque de Pernod
+                                    flameado. Un clásico de la alta cocina francesa.</p>
                             </div>
                         </div>
                     </a>
@@ -263,12 +291,13 @@
                                 <p class="float-right text-primary">COP 170.0000</p>
                             </div>
                             <div class="body">
-                                <p>Pechuga de pato cocinada a la perfección, con piel crujiente y jugosa carne rosada. Servida con reducción de vino de Oporto, puré de calabaza y peras caramelizadas.</p>
+                                <p>Pechuga de pato cocinada a la perfección, con piel crujiente y jugosa carne rosada.
+                                    Servida con reducción de vino de Oporto, puré de calabaza y peras caramelizadas.</p>
                             </div>
                         </div>
                     </a>
                 </div>
-            </div>                  
+            </div>
         </div>
     </section>
     <!-- End of Featured Food Section -->
@@ -278,69 +307,82 @@
         <div class="container">
             <h3 class="section-title mb-6 text-center">Menu principal</h3>
             <div class="card bg-light">
-                <div class="card-body px-4 pb-4 text-center">                   
+                <div class="card-body px-4 pb-4 text-center">
                     <div class="row text-left">
                         <div class="col-md-6 my-4">
-                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                            <a href="#"
+                                class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
                                         Hamburguesa de Angus
-                                        <p class="mt-1 mb-0">Hamburguesa con carne angus 100 gr, pan brioche, mix de quesos cremosos de la casa, doble tocineta, tomate dulce y cebolla.</p>
+                                        <p class="mt-1 mb-0">Hamburguesa con carne angus 100 gr, pan brioche, mix de
+                                            quesos cremosos de la casa, doble tocineta, tomate dulce y cebolla.</p>
                                     </div>
                                     <h6 class="float-right text-primary">COP 25.000</h6>
-                                </div>                            
+                                </div>
                             </a>
                         </div>
                         <div class="col-md-6 my-4">
-                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                            <a href="#"
+                                class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
-                                        Pizza con champiñones 
-                                        <p class="mt-1 mb-0">Con champiñones, incluye únicamente queso y la salsa de tomate.</p>
+                                        Pizza con champiñones
+                                        <p class="mt-1 mb-0">Con champiñones, incluye únicamente queso y la salsa de
+                                            tomate.</p>
                                     </div>
                                     <h6 class="float-right text-primary">COP 15.000</h6>
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-6 my-4">
-                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                            <a href="#"
+                                class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
                                         La Glotona
-                                        <p class="mt-1 mb-0">Hamburguesa con triple carne artesanal, pan brioche, triple queso cheddar, tocineta, lechuga, tomate, cebolla, pepinillos y salsa de la casa.</p>
+                                        <p class="mt-1 mb-0">Hamburguesa con triple carne artesanal, pan brioche, triple
+                                            queso cheddar, tocineta, lechuga, tomate, cebolla, pepinillos y salsa de la
+                                            casa.</p>
                                     </div>
                                     <h6 class="float-right text-primary">COP 30.0000</h6>
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-6 my-4">
-                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                            <a href="#"
+                                class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
-                                        Perro doble 
-                                        <p class="mt-2 mb-0">Hot dog con doble salchicha zenu, pan artesanal, dos huevos de codorniz, queso, jamón, salsas de la casa, cebolla y papitas chip.</p>
+                                        Perro doble
+                                        <p class="mt-2 mb-0">Hot dog con doble salchicha zenu, pan artesanal, dos huevos
+                                            de codorniz, queso, jamón, salsas de la casa, cebolla y papitas chip.</p>
                                     </div>
                                     <h6 class="float-right text-primary">COP 17.500</h6>
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-6 my-4">
-                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                            <a href="#"
+                                class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
                                         Costillas de cerdo al horno
-                                        <p class="mt-2 mb-0">Cosillas de cerdo cocinadas al horno, acompañadas con salsa de la casa, ensalada verde y con papas en cascos.</p>
+                                        <p class="mt-2 mb-0">Cosillas de cerdo cocinadas al horno, acompañadas con salsa
+                                            de la casa, ensalada verde y con papas en cascos.</p>
                                     </div>
                                     <h6 class="float-right text-primary">COP 30.000</h6>
                                 </div>
                             </a>
                         </div>
                         <div class="col-md-6 my-4">
-                            <a href="#" class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
+                            <a href="#"
+                                class="pb-3 mx-3 d-block text-dark text-decoration-none border border-left-0 border-top-0 border-right-0">
                                 <div class="d-flex">
                                     <div class="flex-grow-1">
                                         Chuletas de cerdo a la plancha
-                                        <p class="mt-2 mb-0">Chuletas bañadas en salsas verdes, acompañadas con papas fritas.</p>
+                                        <p class="mt-2 mb-0">Chuletas bañadas en salsas verdes, acompañadas con papas
+                                            fritas.</p>
                                     </div>
                                     <h6 class="float-right text-primary">COP 25.0000</h6>
                                 </div>
@@ -349,7 +391,7 @@
                     </div>
                     <a href="{{ url_for('reservas') }}" class="btn btn-primary mt-4">Reservar</a>
                 </div>
-            </div>                  
+            </div>
         </div>
     </section>
     <!-- End of Menu Section -->
@@ -360,51 +402,56 @@
         <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
             background: #1a1a1a; color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.5); 
             z-index: 1000; width: 90%; max-width: 500px;">
-            
+
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h5 style="margin: 0; color: white;">Editar Perfil</h5>
-                <button onclick="cerrarModalPerfil()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: white;">&times;</button>
+                <button onclick="cerrarModalPerfil()"
+                    style="background: none; border: none; font-size: 20px; cursor: pointer; color: white;">&times;</button>
             </div>
-            
+
             <div class="detalles-perfil">
                 <form id="formEditarPerfil" onsubmit="guardarCambiosPerfil(event)">
                     <div class="form-group mb-3">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <label style="color: white; margin-bottom: 5px;">Nombres:</label>
-                            <button type="button" onclick="toggleEdicion('nombres')" style="background: none; border: none; color: white; cursor: pointer;">
+                            <button type="button" onclick="toggleEdicion('nombres')"
+                                style="background: none; border: none; color: white; cursor: pointer;">
                                 <i class="ti-pencil"></i>
                             </button>
                         </div>
                         <input type="text" id="nombres" name="nombres" required disabled
                             style="width: 100%; padding: 8px; border-radius: 4px; background: #333; border: 1px solid #bc8c4c; color: white;">
                     </div>
-                    
+
                     <div class="form-group mb-3">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <label style="color: white; margin-bottom: 5px;">Apellidos:</label>
-                            <button type="button" onclick="toggleEdicion('apellidos')" style="background: none; border: none; color: white; cursor: pointer;">
+                            <button type="button" onclick="toggleEdicion('apellidos')"
+                                style="background: none; border: none; color: white; cursor: pointer;">
                                 <i class="ti-pencil"></i>
                             </button>
                         </div>
                         <input type="text" id="apellidos" name="apellidos" required disabled
                             style="width: 100%; padding: 8px; border-radius: 4px; background: #333; border: 1px solid #bc8c4c; color: white;">
                     </div>
-                    
+
                     <div class="form-group mb-3">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <label style="color: white; margin-bottom: 5px;">Correo electrónico:</label>
-                            <button type="button" onclick="toggleEdicion('email')" style="background: none; border: none; color: white; cursor: pointer;">
+                            <button type="button" onclick="toggleEdicion('email')"
+                                style="background: none; border: none; color: white; cursor: pointer;">
                                 <i class="ti-pencil"></i>
                             </button>
                         </div>
                         <input type="email" id="email" name="email" required disabled
                             style="width: 100%; padding: 8px; border-radius: 4px; background: #333; border: 1px solid #bc8c4c; color: white;">
                     </div>
-                    
+
                     <div class="form-group mb-3">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <label style="color: white; margin-bottom: 5px;">Celular:</label>
-                            <button type="button" onclick="toggleEdicion('celular')" style="background: none; border: none; color: white; cursor: pointer;">
+                            <button type="button" onclick="toggleEdicion('celular')"
+                                style="background: none; border: none; color: white; cursor: pointer;">
                                 <i class="ti-pencil"></i>
                             </button>
                         </div>
@@ -426,7 +473,9 @@
         <div class="container">
             <div class="row align-items-center text-center text-md-left">
                 <div class="footer-text">
-                    <p class="mb-0 small">&copy; <script>document.write(new Date().getFullYear())</script>, Jean Paul All rights reserved</p>
+                    <p class="mb-0 small">&copy;
+                        <script>document.write(new Date().getFullYear())</script>, Jean Paul All rights reserved
+                    </p>
                 </div>
             </div>
         </div>
@@ -445,77 +494,9 @@
 
     <!-- Scripts -->
     <script>
-        // Evento para el botón de editar perfil
-        document.addEventListener('DOMContentLoaded', function() {
-            // Usando un selector más específico que busca el texto exacto del botón
-            const btnEditarPerfil = Array.from(document.querySelectorAll('a.btn.btn-outline-primary.btn-sm.mr-2'))
-                .find(btn => btn.textContent.trim() === 'Editar Perfil');
-                
-            if (btnEditarPerfil) {
-                btnEditarPerfil.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    abrirModalPerfil();
-                });
-            }
-        });
-
-        // Función para abrir el modal de edición de perfil
-        function abrirModalPerfil() {
-            document.getElementById('modalEditarPerfil').style.display = 'block';
-            // Aquí podrías cargar los datos actuales del usuario
-            // Por ejemplo:
-            /*
-            document.getElementById('nombres').value = datosUsuario.nombres;
-            document.getElementById('apellidos').value = datosUsuario.apellidos;
-            document.getElementById('email').value = datosUsuario.email;
-            document.getElementById('celular').value = datosUsuario.celular;
-            */
-        }
-
-        // Función para cerrar el modal
-        function cerrarModalPerfil() {
-            document.getElementById('modalEditarPerfil').style.display = 'none';
-        }
-
-        // Función para guardar los cambios del perfil
-        function guardarCambiosPerfil(event) {
-            event.preventDefault();
-            
-            const formData = {
-                nombres: document.getElementById('nombres').value,
-                apellidos: document.getElementById('apellidos').value,
-                email: document.getElementById('email').value,
-                celular: document.getElementById('celular').value
-            };
-
-            // Aquí irá la lógica para enviar los datos al servidor
-            console.log('Datos a actualizar:', formData);
-            
-            // Cerrar el modal después de guardar
-            cerrarModalPerfil();
-        }
-
-        // Cerrar el modal si se hace clic fuera de él
-        window.onclick = function(event) {
-            const modal = document.getElementById('modalEditarPerfil');
-            if (event.target == modal) {
-                modal.style.display = 'none';
-            }
-        }
-    </script>
-
-    <!-- Scripts -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const btnEditarPerfil = Array.from(document.querySelectorAll('a.btn.btn-outline-primary.btn-sm.mr-2'))
-                .find(btn => btn.textContent.trim() === 'Editar Perfil');
-                
-            if (btnEditarPerfil) {
-                btnEditarPerfil.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    abrirModalPerfil();
-                });
-            }
+        document.addEventListener('DOMContentLoaded', function () {
+            // Cargar datos del usuario al iniciar la página
+            cargarDatosUsuario();
         });
 
         // Función para abrir el modal y cargar datos del usuario
@@ -535,7 +516,10 @@
                 return;
             }
 
-            fetch(`/api/usuario/${userId}`)
+            fetch('/api/usuario/datos', {
+                method: 'GET',
+                credentials: 'include'
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'success') {
@@ -544,12 +528,11 @@
                         document.getElementById('email').value = data.data.email;
                         document.getElementById('celular').value = data.data.celular;
                     } else {
-                        alert('Error al cargar los datos del usuario');
+                        console.error('Error al cargar los datos:', data.message);
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error al cargar los datos del usuario');
                 });
         }
 
@@ -557,12 +540,12 @@
         function toggleEdicion(fieldId) {
             const campo = document.getElementById(fieldId);
             campo.disabled = !campo.disabled;
-            
+
             // Si algún campo está habilitado, habilitar el botón guardar
             const camposEditables = ['nombres', 'apellidos', 'email', 'celular'];
             const algunCampoHabilitado = camposEditables.some(id => !document.getElementById(id).disabled);
             document.getElementById('btnGuardar').disabled = !algunCampoHabilitado;
-            
+
             // Cambiar el estilo del campo cuando está habilitado
             if (!campo.disabled) {
                 campo.style.backgroundColor = '#424242';
@@ -586,9 +569,9 @@
         }
 
         // Función para guardar los cambios del perfil
-        function guardarCambiosPerfil(event) {
+        async function guardarCambiosPerfil(event) {
             event.preventDefault();
-            
+
             const formData = {
                 nombres: document.getElementById('nombres').value,
                 apellidos: document.getElementById('apellidos').value,
@@ -596,15 +579,32 @@
                 celular: document.getElementById('celular').value
             };
 
-            // Aquí irá la lógica para enviar los datos al servidor
-            console.log('Datos a actualizar:', formData);
-            
-            // Cerrar el modal después de guardar
-            cerrarModalPerfil();
+            try {
+                const response = await fetch('/api/usuario/actualizar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.status === 'success') {
+                    alert('Perfil actualizado correctamente');
+                    cerrarModalPerfil();
+                } else {
+                    alert(result.message || 'Error al actualizar el perfil');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar el perfil');
+            }
         }
 
         // Cerrar el modal si se hace clic fuera de él
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('modalEditarPerfil');
             if (event.target == modal) {
                 cerrarModalPerfil();
@@ -628,4 +628,5 @@
         }
     </script>
 </body>
+
 </html>

@@ -9,7 +9,7 @@
 <body>
     <div class="container" id="container">
         <div class="form-container sign-in-container">
-            <form action="#">
+            <form action="#" id="loginForm">
                 <h1>Ingresa</h1>
                 <input type="email" id="email" color="white" placeholder="Correo electrónico" />
                 <input type="password" id="clave" color="white" placeholder="Clave" />
@@ -18,7 +18,19 @@
                 <!-- Botón móvil que solo aparece cuando el overlay está oculto -->
                 <div class="mobile-signup">
                     <p>¿No tienes una cuenta?</p>
-                    <button type="button" class="ghost mobile-only" onclick="window.location.href='{{ url_for('registrarse') }}'">Registrarme</button>
+                    <button type="button" class="ghost mobile-only" onclick="irARegistro()">Registrarme</button>
+                </div>
+            </form>
+
+            <!-- Formulario de cambio de contraseña (inicialmente oculto) -->
+            <form action="#" id="changePasswordForm" style="display: none;">
+                <h2>Cambiar Contraseña Temporal</h2>
+                <input type="password" id="currentPassword" placeholder="Contraseña temporal (token)" />
+                <input type="password" id="newPassword" placeholder="Nueva contraseña" />
+                <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña" />
+                <div class="button-group">
+                    <button type="button" onclick="updatePassword()">Actualizar Contraseña</button>
+                    <button type="button" class="ghost" onclick="skipPasswordChange()">Mantener Contraseña Temporal</button>
                 </div>
             </form>
         </div>
@@ -42,6 +54,7 @@
             correo: correo,
             clave: clave
         };
+
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -52,13 +65,21 @@
                 body: JSON.stringify(data)
             });
             const result = await response.json();
+            
             if (result.status === "success") {
-                if (result.data.tipo_usuario === "0") {
-                    window.location.href = '/clientes';
-                } else if (result.data.tipo_usuario === "1") {
-                    window.location.href = '/empleado';
-                } else if (result.data.tipo_usuario === "2") {
-                    window.location.href = '/admin';
+                if (result.data.token_recuperacion) {
+                    // Si hay un token de recuperación, mostrar el formulario de cambio de contraseña
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('changePasswordForm').style.display = 'block';
+                } else {
+                    // Redireccionar según el tipo de usuario
+                    if (result.data.tipo_usuario === "0") {
+                        window.location.href = '/clientes';
+                    } else if (result.data.tipo_usuario === "1") {
+                        window.location.href = '/empleado';
+                    } else if (result.data.tipo_usuario === "2") {
+                        window.location.href = '/admin';
+                    }
                 }
             } else {
                 alert(result.message);
@@ -69,8 +90,61 @@
         }
     }
 
-    document.getElementById('signUp').addEventListener('click', function() {
+    function irARegistro() {
         window.location.href = "{{ url_for('registrarse') }}";
+    }
+
+    document.getElementById('signUp').addEventListener('click', function() {
+        irARegistro();
     });
+
+    async function updatePassword() {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const email = document.getElementById('email').value;
+
+        if (newPassword !== confirmPassword) {
+            alert('Las contraseñas nuevas no coinciden');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/actualizar-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email: email,
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert('Contraseña actualizada exitosamente');
+                window.location.reload();
+            } else {
+                alert(result.message || 'Error al actualizar la contraseña');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al actualizar la contraseña');
+        }
+    }
+
+    function skipPasswordChange() {
+        const userType = "{{ session.get('user_type', '0') }}";
+        if (userType === "0") {
+            window.location.href = '/clientes';
+        } else if (userType === "1") {
+            window.location.href = '/empleado';
+        } else if (userType === "2") {
+            window.location.href = '/admin';
+        }
+    }
 </script>
 </html>

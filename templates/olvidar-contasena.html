@@ -109,7 +109,7 @@
             const mensajeDiv = document.getElementById('mensaje');
 
             try {
-                const response = await fetch('http://localhost:5000/recuperar-clave', {
+                const response = await fetch('/recuperar-clave', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Empleado</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pigga.css')}}">
-    <style>
+     <style>
         body {
             margin: 0;
             padding: 0;
@@ -217,6 +218,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Barra de navegación -->
     <nav class="navbar custom-navbar navbar-expand-sm navbar-dark bg-dark">
@@ -224,11 +226,12 @@
             <a class="navbar-brand" href="#" style="color: #ffffff !important;">
                 Panel de Empleado
             </a>
-            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ml-auto"> 
+                <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="showDashboard('reservas')">Reservas</a>
                     </li>
@@ -250,15 +253,15 @@
             <div class="dashboard-stats">
                 <div class="stat-card">
                     <h3>Reservas Activas</h3>
-                    <p>45</p>
+                    <p>{{ reservas.activas }}</p>
                 </div>
                 <div class="stat-card">
                     <h3>Completadas</h3>
-                    <p>230</p>
+                    <p>{{ reservas.completadas }}</p>
                 </div>
                 <div class="stat-card">
                     <h3>Canceladas</h3>
-                    <p>15</p>
+                    <p>{{ reservas.canceladas }}</p>
                 </div>
             </div>
             <div class="table-responsive">
@@ -276,36 +279,33 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for reserva in reservas.lista %}
                         <tr>
-                            <td>1</td>
-                            <td>Carlos Ruiz</td>
-                            <td>5</td>
-                            <td>25/09/2023</td>
-                            <td>20:00</td>
-                            <td>4</td>
-                            <td><span class="status-badge status-pending">Pendiente</span></td>
+                            <td>{{ reserva.id }}</td>
+                            <td>{{ reserva.cliente }}</td>
+                            <td>{{ reserva.mesa_id }}</td>
+                            <td>{{ reserva.fecha }}</td>
+                            <td>{{ reserva.hora }}</td>
+                            <td>{{ reserva.num_personas }}</td>
+                            <td><span class="status-badge status-{{ reserva.estado }}">{{ reserva.estado|title }}</span>
+                            </td>
                             <td>
                                 <div class="btn-group">
-                                    <button class="btn btn-info btn-sm" onclick="editarReserva(1)">Editar</button>
-                                    <button class="btn btn-success btn-sm">Completar</button>
-                                    <button class="btn btn-danger btn-sm">Cancelar</button>
+                                    {% if reserva.estado == 'activa' %}
+                                    <button class="btn btn-info btn-sm"
+                                        onclick="editarReserva('{{ reserva.id }}')">Editar</button>
+                                    <button class="btn btn-success btn-sm"
+                                        onclick="updateReservationStatus('{{ reserva.id }}', 'completada')">Completar</button>
+                                    <button class="btn btn-danger btn-sm"
+                                        onclick="updateReservationStatus('{{ reserva.id }}', 'cancelada')">Cancelar</button>
+                                    {% else %}
+                                    <button class="btn btn-info btn-sm" onclick="verComprobante('{{ reserva.id }}')">Ver
+                                        Detalles</button>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Ana Torres</td>
-                            <td>3</td>
-                            <td>25/09/2023</td>
-                            <td>21:00</td>
-                            <td>2</td>
-                            <td><span class="status-badge status-completed">Completada</span></td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-info btn-sm">Ver Detalles</button>
-                                </div>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -328,20 +328,15 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for plato in menu.lista %}
                         <tr>
-                            <td>1</td>
-                            <td>Filete Wagyu</td>
-                            <td>300g</td>
-                            <td>$120.000</td>
-                            <td>Plato Principal</td>
+                            <td>{{ plato.id }}</td>
+                            <td>{{ plato.nombre }}</td>
+                            <td>{{ plato.gramaje }}g</td>
+                            <td>${{ "{:,.0f}".format(plato.precio) }}</td>
+                            <td>{{ plato.tipo_alimento }}</td>
                         </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Langosta Thermidor</td>
-                            <td>400g</td>
-                            <td>$150.000</td>
-                            <td>Plato Principal</td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -388,6 +383,17 @@
         </div>
     </div>
 
+    <!-- Modal de Comprobante -->
+    <div id="modalComprobante" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalComprobante()">&times;</span>
+            <h2>Detalles del Comprobante</h2>
+            <div id="detallesComprobante">
+                <!-- Los detalles se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='assets/vendors/jquery/jquery-3.4.1.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/vendors/bootstrap/bootstrap.bundle.js') }}"></script>
@@ -399,9 +405,53 @@
             document.getElementById(dashboardId).classList.add('active');
         }
 
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP'
+            }).format(amount);
+        }
+
+        async function verComprobante(reservaId) {
+            try {
+                const response = await fetch(`/api/reservas/${reservaId}/comprobante`);
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    const comprobante = result.data;
+                    const detallesHTML = `
+                        <div class="comprobante-details">
+                            <p><strong>Cliente:</strong> ${comprobante.nombres} ${comprobante.apellidos}</p>
+                            <p><strong>Documento:</strong> ${comprobante.num_documento}</p>
+                            <p><strong>Contacto:</strong></p>
+                            <ul>
+                                <li>Celular: ${comprobante.celular}</li>
+                                <li>Correo: ${comprobante.correo}</li>
+                            </ul>
+                            <p><strong>Productos:</strong> ${comprobante.nombre_producto}</p>
+                            <p><strong>Subtotal:</strong> ${formatCurrency(comprobante.subtotal)}</p>
+                            <p><strong>Total (IVA 19%):</strong> ${formatCurrency(comprobante.total)}</p>
+                        </div>
+                    `;
+
+                    document.getElementById('detallesComprobante').innerHTML = detallesHTML;
+                    document.getElementById('modalComprobante').style.display = 'block';
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar el comprobante');
+            }
+        }
+
+        function cerrarModalComprobante() {
+            document.getElementById('modalComprobante').style.display = 'none';
+        }
+
         function editarReserva(id) {
-            // Aquí cargarías los datos de la reserva
             document.getElementById('modalEditarReserva').style.display = 'block';
+            // Aquí se podría cargar los datos actuales de la reserva
         }
 
         function cerrarModal() {
@@ -409,18 +459,16 @@
         }
 
         // Cerrar modal al hacer clic fuera de él
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             let modal = document.getElementById('modalEditarReserva');
             if (event.target == modal) {
                 modal.style.display = 'none';
             }
         }
 
-        // Manejar el envío del formulario
-        document.getElementById('formEditarReserva').onsubmit = function(e) {
+        // Manejar el envío del formulario de edición
+        document.getElementById('formEditarReserva').onsubmit = async function (e) {
             e.preventDefault();
-            // Aquí irá la lógica para enviar los datos al servidor
-            // Ejemplo de objeto con los datos del formulario
             const datos = {
                 mesa_id: document.getElementById('mesa_id').value,
                 fecha: document.getElementById('fecha').value,
@@ -428,10 +476,53 @@
                 num_personas: document.getElementById('num_personas').value,
                 estado: document.getElementById('estado').value
             };
-            console.log('Datos a enviar:', datos);
-            // Aquí irá la llamada al endpoint para actualizar la reserva
+
+            try {
+                const response = await fetch('/api/reservas/' + reservaId + '/update', {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(datos)
+                });
+
+                const result = await response.json();
+                if (result.status === "success") {
+                    window.location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar la reserva');
+            }
+
             cerrarModal();
         };
+
+        async function updateReservationStatus(reservaId, nuevoEstado) {
+            try {
+                const response = await fetch(`/api/reservas/${reservaId}/update-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+
+                const result = await response.json();
+                if (result.status === "success") {
+                    window.location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar la reserva');
+            }
+        }
+
         async function cerrarSesion() {
             try {
                 const response = await fetch('/api/logout', {
@@ -449,4 +540,5 @@
         }
     </script>
 </body>
+
 </html>

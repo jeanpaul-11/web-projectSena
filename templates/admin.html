@@ -252,15 +252,15 @@
             <div class="dashboard-stats">
                 <div class="stat-card">
                     <h3>Total Usuarios</h3>
-                    <p>150</p>
+                    <p>{{ usuarios.total }}</p>
                 </div>
                 <div class="stat-card">
                     <h3>Activos</h3>
-                    <p>120</p>
+                    <p>{{ usuarios.activos }}</p>
                 </div>
                 <div class="stat-card">
                     <h3>Bloqueados</h3>
-                    <p>30</p>
+                    <p>{{ usuarios.bloqueados }}</p>
                 </div>
             </div>
             <div class="table-responsive">
@@ -276,34 +276,24 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for usuario in usuarios.lista %}
                         <tr>
-                            <td>1</td>
-                            <td>Juan Pérez</td>
-                            <td>juan@email.com</td>
-                            <td><span class="status-badge status-active">Activo</span></td>
-                            <td>Cliente</td>
+                            <td>{{ usuario.id }}</td>
+                            <td>{{ usuario.nombre }}</td>
+                            <td>{{ usuario.correo }}</td>
+                            <td><span class="status-badge status-{% if usuario.estado == 'activa' %}active{% else %}blocked{% endif %}">{{ usuario.estado|title }}</span></td>
+                            <td>{{ usuario.tipo_usuario|title }}</td>
                             <td>
                                 <div class="btn-group">
-                                    <button class="btn btn-warning btn-sm">Bloquear</button>
-                                    <button class="btn btn-info btn-sm">Editar</button>
-                                    <button class="btn btn-danger btn-sm">Eliminar</button>
+                                    {% if usuario.estado == 'activa' %}
+                                    <button class="btn btn-warning btn-sm" onclick="toggleUserStatus('{{ usuario.id }}', this)">Bloquear</button>
+                                    {% else %}
+                                    <button class="btn btn-success btn-sm" onclick="toggleUserStatus('{{ usuario.id }}', this)">Activar</button>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>María López</td>
-                            <td>maria@email.com</td>
-                            <td><span class="status-badge status-blocked">Bloqueado</span></td>
-                            <td>Empleado</td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-success btn-sm">Activar</button>
-                                    <button class="btn btn-info btn-sm">Editar</button>
-                                    <button class="btn btn-danger btn-sm">Eliminar</button>
-                                </div>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -317,15 +307,15 @@
             <div class="dashboard-stats">
                 <div class="stat-card">
                     <h3>Reservas Activas</h3>
-                    <p>45</p>
+                    <p>{{ reservas.activas }}</p>
                 </div>
                 <div class="stat-card">
                     <h3>Completadas</h3>
-                    <p>230</p>
+                    <p>{{ reservas.completadas }}</p>
                 </div>
                 <div class="stat-card">
                     <h3>Canceladas</h3>
-                    <p>15</p>
+                    <p>{{ reservas.canceladas }}</p>
                 </div>
             </div>
             <div class="table-responsive">
@@ -342,33 +332,26 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for reserva in reservas.lista %}
                         <tr>
-                            <td>1</td>
-                            <td>Carlos Ruiz</td>
-                            <td>25/09/2023</td>
-                            <td>20:00</td>
-                            <td>4</td>
-                            <td><span class="status-badge status-pending">Pendiente</span></td>
+                            <td>{{ reserva.id }}</td>
+                            <td>{{ reserva.cliente }}</td>
+                            <td>{{ reserva.fecha }}</td>
+                            <td>{{ reserva.hora }}</td>
+                            <td>{{ reserva.num_personas }}</td>
+                            <td><span class="status-badge status-{{ reserva.estado }}">{{ reserva.estado|title }}</span></td>
                             <td>
                                 <div class="btn-group">
-                                    <button class="btn btn-success btn-sm">Completar</button>
-                                    <button class="btn btn-danger btn-sm">Cancelar</button>
+                                    {% if reserva.estado == 'activa' %}
+                                    <button class="btn btn-success btn-sm" onclick="updateReservationStatus('{{ reserva.id }}', 'completada')">Completar</button>
+                                    <button class="btn btn-danger btn-sm" onclick="updateReservationStatus('{{ reserva.id }}', 'cancelada')">Cancelar</button>
+                                    {% else %}
+                                    <button class="btn btn-info btn-sm" onclick="verComprobante('{{ reserva.id }}')">Ver Detalles</button>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Ana Torres</td>
-                            <td>25/09/2023</td>
-                            <td>21:00</td>
-                            <td>2</td>
-                            <td><span class="status-badge status-completed">Completada</span></td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-info btn-sm">Ver Detalles</button>
-                                </div>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -393,12 +376,13 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for plato in menu.lista %}
                         <tr>
-                            <td>1</td>
-                            <td>Filete Wagyu</td>
-                            <td>300g</td>
-                            <td>$120.000</td>
-                            <td>Plato Principal</td>
+                            <td>{{ plato.id }}</td>
+                            <td>{{ plato.nombre }}</td>
+                            <td>{{ plato.gramaje }}g</td>
+                            <td>${{ "{:,.0f}".format(plato.precio) }}</td>
+                            <td>{{ plato.tipo_alimento }}</td>
                             <td>
                                 <div class="btn-group">
                                     <button class="btn btn-info btn-sm">Editar</button>
@@ -406,21 +390,20 @@
                                 </div>
                             </td>
                         </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Langosta Thermidor</td>
-                            <td>400g</td>
-                            <td>$150.000</td>
-                            <td>Plato Principal</td>
-                            <td>
-                                <div class="btn-group">
-                                    <button class="btn btn-info btn-sm">Editar</button>
-                                    <button class="btn btn-danger btn-sm">Eliminar</button>
-                                </div>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Comprobante -->
+    <div id="modalComprobante" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalComprobante()">&times;</span>
+            <h2>Detalles del Comprobante</h2>
+            <div id="detallesComprobante">
+                <!-- Los detalles se cargarán aquí dinámicamente -->
             </div>
         </div>
     </div>
@@ -439,6 +422,58 @@
             document.getElementById(dashboardId).classList.add('active');
         }
 
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP'
+            }).format(amount);
+        }
+
+        async function verComprobante(reservaId) {
+            try {
+                const response = await fetch(`/api/reservas/${reservaId}/comprobante`);
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    const comprobante = result.data;
+                    const detallesHTML = `
+                        <div class="comprobante-details">
+                            <p><strong>Cliente:</strong> ${comprobante.nombres} ${comprobante.apellidos}</p>
+                            <p><strong>Documento:</strong> ${comprobante.num_documento}</p>
+                            <p><strong>Contacto:</strong></p>
+                            <ul>
+                                <li>Celular: ${comprobante.celular}</li>
+                                <li>Correo: ${comprobante.correo}</li>
+                            </ul>
+                            <p><strong>Productos:</strong> ${comprobante.nombre_producto}</p>
+                            <p><strong>Subtotal:</strong> ${formatCurrency(comprobante.subtotal)}</p>
+                            <p><strong>Total (IVA 19%):</strong> ${formatCurrency(comprobante.total)}</p>
+                        </div>
+                    `;
+                    
+                    document.getElementById('detallesComprobante').innerHTML = detallesHTML;
+                    document.getElementById('modalComprobante').style.display = 'block';
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar el comprobante');
+            }
+        }
+
+        function cerrarModalComprobante() {
+            document.getElementById('modalComprobante').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('modalComprobante');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+
         async function cerrarSesion() {
             try {
                 const response = await fetch('/api/logout', {
@@ -452,6 +487,63 @@
             } catch (error) {
                 console.error('Error:', error);
                 alert('Error al cerrar sesión');
+            }
+        }
+
+        async function toggleUserStatus(userId, button) {
+            try {
+                const response = await fetch(`/api/usuarios/${userId}/toggle-status`, {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    // Actualizar el estado en la interfaz
+                    const statusBadge = button.closest('tr').querySelector('.status-badge');
+                    statusBadge.className = `status-badge status-${result.nuevo_estado === 'activa' ? 'active' : 'blocked'}`;
+                    statusBadge.textContent = result.nuevo_estado.charAt(0).toUpperCase() + result.nuevo_estado.slice(1);
+                    
+                    // Cambiar el botón
+                    if (result.nuevo_estado === 'activa') {
+                        button.className = 'btn btn-warning btn-sm';
+                        button.textContent = 'Bloquear';
+                    } else {
+                        button.className = 'btn btn-success btn-sm';
+                        button.textContent = 'Activar';
+                    }
+                    
+                    // Recargar las estadísticas
+                    window.location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cambiar el estado del usuario');
+            }
+        }
+
+        async function updateReservationStatus(reservaId, nuevoEstado) {
+            try {
+                const response = await fetch(`/api/reservas/${reservaId}/update-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({ estado: nuevoEstado })
+                });
+                
+                const result = await response.json();
+                if (result.status === "success") {
+                    window.location.reload();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar la reserva');
             }
         }
     </script>

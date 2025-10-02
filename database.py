@@ -9,28 +9,279 @@ class DatabaseManager:
         connection.row_factory = sqlite3.Row
         return connection
 
+    def get_user_stats(self):
+        """Obtener estadísticas de usuarios"""
+        try:
+            connection = self.get_connection()
+            cursor = connection.cursor()
+            
+            # Total de usuarios
+            cursor.execute("SELECT COUNT(*) as total FROM usuarios")
+            total = cursor.fetchone()['total']
+            
+            # Usuarios activos
+            cursor.execute("SELECT COUNT(*) as activos FROM usuarios WHERE estado = 'activa'")
+            activos = cursor.fetchone()['activos']
+            
+            # Usuarios bloqueados
+            cursor.execute("SELECT COUNT(*) as bloqueados FROM usuarios WHERE estado = 'bloqueado'")
+            bloqueados = cursor.fetchone()['bloqueados']
+            
+            # Lista de usuarios
+            cursor.execute("""
+                SELECT id, nombres || ' ' || apellidos as nombre, correo, estado, tipo_usuario 
+                FROM usuarios
+                ORDER BY id DESC
+            """)
+            usuarios = [dict(row) for row in cursor.fetchall()]
+            
+            cursor.close()
+            connection.close()
+            
+            return {
+                "total": total,
+                "activos": activos,
+                "bloqueados": bloqueados,
+                "lista": usuarios
+            }
+        except sqlite3.Error as e:
+            print(f"Error obteniendo estadísticas de usuarios: {e}")
+            return None
+
+    def get_reservation_stats(self):
+        """Obtener estadísticas de reservas"""
+        try:
+            connection = self.get_connection()
+            cursor = connection.cursor()
+            
+            # Total de reservas activas
+            cursor.execute("SELECT COUNT(*) as activas FROM reservas WHERE estado = 'activa'")
+            activas = cursor.fetchone()['activas']
+            
+            # Reservas completadas
+            cursor.execute("SELECT COUNT(*) as completadas FROM reservas WHERE estado = 'completada'")
+            completadas = cursor.fetchone()['completadas']
+            
+            # Reservas canceladas
+            cursor.execute("SELECT COUNT(*) as canceladas FROM reservas WHERE estado = 'cancelada'")
+            canceladas = cursor.fetchone()['canceladas']
+            
+            # Lista de reservas con información del cliente
+            cursor.execute("""
+                SELECT r.id, u.nombres || ' ' || u.apellidos as cliente, r.mesa_id,
+                       r.fecha, r.hora, r.num_personas, r.estado
+                FROM reservas r
+                JOIN usuarios u ON r.cliente_id = u.id
+                ORDER BY r.fecha DESC, r.hora DESC
+            """)
+            reservas = [dict(row) for row in cursor.fetchall()]
+            
+            cursor.close()
+            connection.close()
+            
+            return {
+                "activas": activas,
+                "completadas": completadas,
+                "canceladas": canceladas,
+                "lista": reservas
+            }
+        except sqlite3.Error as e:
+            print(f"Error obteniendo estadísticas de reservas: {e}")
+            return None
+
+    def get_comprobante(self, reserva_id):
+        """Obtener el comprobante de una reserva"""
+        try:
+            connection = self.get_connection()
+            cursor = connection.cursor()
+            
+            # Obtener todos los detalles de la reserva, cliente y pedidos
+            cursor.execute("""
+                SELECT 
+                    r.id as reserva_id, 
+                    u.nombres, 
+                    u.apellidos, 
+                    u.num_documento, 
+                    u.celular, 
+                    u.correo,
+                    c.subtotal,
+                    c.total,
+                    c.fecha_emision,
+                    GROUP_CONCAT(a.nombre || ' (x' || p.cantidad || ')') as productos
+                FROM reservas r
+                JOIN usuarios u ON r.cliente_id = u.id
+                JOIN comprobantes c ON r.id = c.reserva_id
+                LEFT JOIN pedidos p ON r.id = p.reserva_id
+                LEFT JOIN alimentos a ON p.alimento_id = a.id
+                WHERE r.id = ?
+                GROUP BY r.id
+            """, (reserva_id,))
+            
+            result = cursor.fetchone()
+            
+            if not result:
+                cursor.close()
+                connection.close()
+                return None
+                
+            # Formatear los datos
+            comprobante = dict(result)
+            
+            cursor.close()
+            connection.close()
+            return comprobante
+            
+        except sqlite3.Error as e:
+            print(f"Error obteniendo comprobante: {e}")
+            return None
+
+    def crear_comprobante(self, reserva_id):
+        """Crear un comprobante para una reserva completada"""
+        try:
+            connection = self.get_connection()
+            cursor = connection.cursor()
+            
+            # Obtener información de los pedidos y calcular el total
+            cursor.execute("""
+                SELECT SUM(a.precio * p.cantidad) as subtotal
+                FROM pedidos p
+                JOIN alimentos a ON p.alimento_id = a.id
+                WHERE p.reserva_id = ?
+                GROUP BY p.reserva_id
+            """, (reserva_id,))
+            
+            result = cursor.fetchone()
+            
+            if not result:
+                subtotal = 0
+            else:
+                subtotal = result['subtotal']
+            
+            total = subtotal * 1.19  # Incluyendo IVA del 19%
+            
+            # Insertar el comprobante
+            cursor.execute("""
+                INSERT INTO comprobantes (
+                    reserva_id, subtotal, total
+                ) VALUES (?, ?, ?)
+            """, (reserva_id, subtotal, total))
+            
+            connection.commit()
+            cursor.close()
+            connection.close()
+            return True, "Comprobante creado exitosamente"
+            
+        except sqlite3.Error as e:
+            print(f"Error creando comprobante: {e}")
+            return False, f"Error al crear el comprobante: {str(e)}"
+
+    def get_menu_stats(self):
+        """Obtener estadísticas del menú"""
+        try:
+            connection = self.get_connection()
+            cursor = connection.cursor()
+            
+            # Total de platos
+            cursor.execute("SELECT COUNT(*) as total FROM alimentos")
+            total = cursor.fetchone()['total']
+            
+            # Lista de platos
+            cursor.execute("""
+                SELECT id, nombre, tipo_alimento, gramaje, precio
+                FROM alimentos
+                ORDER BY tipo_alimento, nombre
+            """)
+            platos = [dict(row) for row in cursor.fetchall()]
+            
+            # Agrupar platos por tipo
+            cursor.execute("""
+                SELECT tipo_alimento, COUNT(*) as cantidad
+                FROM alimentos
+                GROUP BY tipo_alimento
+            """)
+            tipos = [dict(row) for row in cursor.fetchall()]
+            
+            cursor.close()
+            connection.close()
+            
+            return {
+                "total": total,
+                "tipos": tipos,
+                "lista": platos
+            }
+        except sqlite3.Error as e:
+            print(f"Error obteniendo estadísticas del menú: {e}")
+            return None
+
     def validar_usuario(self, correo, contrasena):
         try:
             connection = self.get_connection()
             cursor = connection.cursor()
-            query = "SELECT * FROM usuarios WHERE correo = ? AND contrasena = ?"
-            values = (correo, contrasena)
-            cursor.execute(query, values)
-            resultado = cursor.fetchone()
-            cursor.close()
-            connection.close()
-            if resultado:
+            
+            # Primero verificar si el usuario existe y su estado
+            check_query = "SELECT * FROM usuarios WHERE correo = ?"
+            cursor.execute(check_query, (correo,))
+            usuario = cursor.fetchone()
+            
+            if not usuario:
+                cursor.close()
+                connection.close()
+                return {"status": "error", "message": "Usuario no encontrado"}
+            
+            # Verificar si la cuenta está bloqueada
+            if usuario['estado'] == 'bloqueado':
+                cursor.close()
+                connection.close()
+                return {"status": "error", "message": "Cuenta bloqueada. Contacte al administrador"}
+            
+            # Si tiene token de recuperación, solo puede iniciar sesión con el token
+            if usuario['token_recuperacion']:
+                if contrasena != usuario['token_recuperacion']:
+                    cursor.close()
+                    connection.close()
+                    return {"status": "error", "message": "Debe usar el token enviado a su correo"}
+                    
+            # Verificar la contraseña
+            if contrasena == usuario['contrasena'] or (usuario['token_recuperacion'] and contrasena == usuario['token_recuperacion']):
+                # Actualizar último login y reiniciar intentos fallidos
+                cursor.execute("""
+                    UPDATE usuarios 
+                    SET intentos_fallidos = 0,
+                        ultimo_login = CURRENT_TIMESTAMP 
+                    WHERE correo = ?
+                """, (correo,))
+                connection.commit()
+                
+                cursor.close()
+                connection.close()
                 return {
                     "status": "success", 
                     "message": "Usuario validado correctamente",
                     "data": {
-                        "tipo_usuario": resultado['tipo_usuario'],
-                        "id": resultado['id'],
-                        "nombres": resultado['nombres']
+                        "tipo_usuario": usuario['tipo_usuario'],
+                        "id": usuario['id'],
+                        "nombres": usuario['nombres'],
+                        "token_recuperacion": usuario['token_recuperacion']
                     }
                 }
             else:
-                return {"status": "error", "message": "Correo o contraseña incorrectos"}
+                # Incrementar intentos fallidos
+                intentos = usuario['intentos_fallidos'] + 1 if usuario['intentos_fallidos'] else 1
+                nuevo_estado = 'bloqueado' if intentos >= 3 else usuario['estado']
+                
+                cursor.execute("""
+                    UPDATE usuarios 
+                    SET intentos_fallidos = ?, 
+                        estado = ? 
+                    WHERE correo = ?
+                """, (intentos, nuevo_estado, correo))
+                connection.commit()
+                
+                mensaje = "Cuenta bloqueada por múltiples intentos fallidos" if intentos >= 3 else f"Contraseña incorrecta. Intentos restantes: {3 - intentos}"
+                
+                cursor.close()
+                connection.close()
+                return {"status": "error", "message": mensaje}
         except sqlite3.Error as e:
             return {"status": "error", "message": f"Error validando usuario: {e}"}
         
@@ -38,9 +289,29 @@ class DatabaseManager:
         try:
             connection = self.get_connection()
             cursor = connection.cursor()
+            
+            # Verificar si el correo ya está registrado
+            cursor.execute("SELECT id FROM usuarios WHERE correo = ?", (email,))
+            if cursor.fetchone():
+                cursor.close()
+                connection.close()
+                return {"status": "error", "message": "El correo ya está registrado"}
+            
+            # Verificar si el número de documento ya está registrado
+            cursor.execute("SELECT id FROM usuarios WHERE num_documento = ?", (num_documento,))
+            if cursor.fetchone():
+                cursor.close()
+                connection.close()
+                return {"status": "error", "message": "El número de documento ya está registrado"}
+            
             insert_query = """
-                INSERT INTO usuarios (nombres, apellidos, tipo_documento, num_documento, celular, correo, contrasena) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO usuarios (
+                    tipo_usuario, nombres, apellidos, tipo_documento, 
+                    num_documento, celular, correo, contrasena, 
+                    intentos_fallidos, estado
+                ) VALUES (
+                    'cliente', ?, ?, ?, ?, ?, ?, ?, 0, 'activa'
+                )
             """
             values = (nombres, apellidos, tipo_documento, num_documento, celular, email, password)
             cursor.execute(insert_query, values)
@@ -85,7 +356,7 @@ class DatabaseManager:
         except sqlite3.Error as e:
             print(f"Error insertando reserva: {e}")
 
-    def crear_reserva(self, cliente_id, fecha, hora, num_personas, platos=None):
+    def crear_reserva(self, cliente_id, fecha, hora, num_personas, alimentos=None):
         try:
             connection = self.get_connection()
             cursor = connection.cursor()
@@ -95,18 +366,18 @@ class DatabaseManager:
                 SELECT m.id FROM mesas m 
                 WHERE m.capacidad >= ? AND m.id NOT IN (
                     SELECT mesa_id FROM reservas 
-                    WHERE fecha = ? AND hora = ? AND estado = 'disponible'
+                    WHERE fecha = ? AND hora = ? AND estado = 'activa'
                 )
                 LIMIT 1
             """, (num_personas, fecha, hora))
             
             mesa = cursor.fetchone()
             if not mesa:
+                cursor.close()
+                connection.close()
                 return False, "No hay mesas disponibles para esa fecha y hora"
             
             mesa_id = mesa['id']
-            
-            print("va a a crear la reserva....")
             
             # Crear la reserva
             cursor.execute("""
@@ -116,17 +387,18 @@ class DatabaseManager:
             
             reserva_id = cursor.lastrowid
             
-            print("va a validar si hay platos....")
-             
-            # Si hay platos seleccionados, registrarlos
-            if platos:
-                for plato in platos:
+            # Si hay alimentos seleccionados, registrarlos
+            if alimentos:
+                for alimento in alimentos:
                     cursor.execute("""
-                        INSERT INTO pedidos (reserva_id, plato_id, cantidad, precio_unitario)
-                        VALUES (?, ?, ?, ?)
-                    """, (reserva_id, plato['id'], plato['cantidad'], plato['precio']))
+                        INSERT INTO pedidos (reserva_id, alimento_id, cantidad)
+                        VALUES (?, ?, ?)
+                    """, (reserva_id, alimento['id'], alimento['cantidad']))
             
-            print("termino validar y inserto platos....")
+            # Actualizar estado de la mesa
+            cursor.execute("""
+                UPDATE mesas SET estado = 'reservada' WHERE id = ?
+            """, (mesa_id,))
             
             connection.commit()
             cursor.close()

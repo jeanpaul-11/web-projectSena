@@ -2,6 +2,30 @@
 
 * {
 	box-sizing: border-box;
+	user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	cursor: default;
+}
+
+/* Permitir selección de texto solo en campos de entrada */
+input, textarea {
+	user-select: text !important;
+	-webkit-user-select: text !important;
+	-moz-user-select: text !important;
+	-ms-user-select: text !important;
+	cursor: text !important;
+}
+
+/* Estilo para enlaces */
+a {
+	cursor: pointer !important;
+}
+
+/* Estilo para botones */
+button {
+	cursor: pointer !important;
 }
 
 body {
