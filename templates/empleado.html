@@ -49,20 +49,26 @@
         .dashboard h2.section-title {
             color: white;
         }
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
         .admin-table {
             width: 100%;
             background: #2c2c2c;
             border-radius: 8px;
-            overflow: hidden;
             margin-top: 20px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             border: 1px solid rgba(255,255,255,0.1);
+            border-collapse: collapse;
         }
         .admin-table th {
             background: #1a1a1a;
             color: white;
             padding: 15px;
             text-align: left;
+            white-space: nowrap;
         }
         .admin-table td {
             padding: 12px 15px;
@@ -76,9 +82,27 @@
         .admin-table tr:last-child td {
             border-bottom: none;
         }
+
+
+        /* Ajustes específicos para la columna de acciones */
+        .admin-table th:last-child,
+        .admin-table td:last-child {
+            min-width: 250px;
+            width: 250px;
+        }
+       
         .btn-group {
             display: flex;
             gap: 5px;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+        }
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            flex: 0 0 auto;
+        
         }
         .status-badge {
             padding: 5px 10px;

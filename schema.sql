@@ -33,6 +33,7 @@ CREATE TABLE alimentos (
     gramaje INTEGER,
     precio DECIMAL(10,2) NOT NULL,
     estado TEXT CHECK (estado IN ('disponible', 'agotado', 'descontinuado')) DEFAULT 'disponible'
+    url_imagen TEXT
 );
 
 CREATE TABLE reservas (

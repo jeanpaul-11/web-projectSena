@@ -298,9 +298,9 @@ def add_menu_item():
         cursor = connection.cursor()
         
         cursor.execute("""
-            INSERT INTO alimentos (nombre, tipo_alimento, gramaje, precio)
-            VALUES (?, ?, ?, ?)
-        """, (data['nombre'], data['tipo_alimento'], data['gramaje'], data['precio']))
+            INSERT INTO alimentos (nombre, descripcion, tipo_alimento, gramaje, precio, estado, url_imagen)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (data['nombre'], data['descripcion'], data['tipo_alimento'], data['gramaje'], data['precio'], data['estado'], data.get('url_imagen')))
         
         connection.commit()
         cursor.close()
@@ -309,6 +309,59 @@ def add_menu_item():
         return jsonify({
             "status": "success",
             "message": "Plato agregado correctamente"
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/menu/<int:id>', methods=['GET'])
+def get_menu_item(id):
+    try:
+        connection = db_manager.get_connection()
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+        
+        cursor.execute("SELECT * FROM alimentos WHERE id = ?", (id,))
+        plato = cursor.fetchone()
+        
+        if plato:
+            plato_dict = dict(plato)
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "status": "success",
+                "plato": plato_dict
+            })
+        else:
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "status": "error",
+                "message": "Plato no encontrado"
+            }), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/menu/update', methods=['POST'])
+def update_menu_item():
+    try:
+        data = request.json
+        connection = db_manager.get_connection()
+        cursor = connection.cursor()
+        
+        cursor.execute("""
+            UPDATE alimentos 
+            SET nombre = ?, descripcion = ?, tipo_alimento = ?, gramaje = ?, precio = ?, estado = ?, url_imagen = ?
+            WHERE id = ?
+        """, (data['nombre'], data['descripcion'], data['tipo_alimento'], data['gramaje'], 
+              data['precio'], data['estado'], data.get('url_imagen'), data['id']))
+        
+        connection.commit()
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Plato actualizado correctamente"
         })
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -350,9 +403,10 @@ def manage_menu_item(plato_id):
             data = request.json
             cursor.execute("""
                 UPDATE alimentos 
-                SET nombre = ?, tipo_alimento = ?, gramaje = ?, precio = ?
+                SET nombre = ?, descripcion = ?, tipo_alimento = ?, gramaje = ?, precio = ?, estado = ?, url_imagen = ?
                 WHERE id = ?
-            """, (data['nombre'], data['tipo_alimento'], data['gramaje'], data['precio'], plato_id))
+            """, (data['nombre'], data['descripcion'], data['tipo_alimento'], data['gramaje'], 
+                  data['precio'], data['estado'], data.get('url_imagen'), plato_id))
             mensaje = "Plato actualizado correctamente"
         
         connection.commit()
