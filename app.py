@@ -235,6 +235,198 @@ def obtener_usuario(user_id):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/usuario/<int:user_id>/detalles', methods=['GET'])
+def obtener_detalles_usuario(user_id):
+    try:
+        connection = db_manager.get_connection()
+        cursor = connection.cursor()
+        query = """
+            SELECT id, nombres, apellidos, tipo_documento, num_documento, 
+                   celular, correo, tipo_usuario
+            FROM usuarios 
+            WHERE id = ?
+        """
+        cursor.execute(query, (user_id,))
+        usuario = cursor.fetchone()
+        cursor.close()
+        connection.close()
+
+        if usuario:
+            return jsonify({
+                "status": "success",
+                "data": dict(usuario)
+            })
+        else:
+            return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/usuarios/add', methods=['POST'])
+def agregar_usuario():
+    try:
+        data = request.json
+        connection = db_manager.get_connection()
+        cursor = connection.cursor()
+        
+        # Verificar si el correo ya existe
+        cursor.execute("SELECT id FROM usuarios WHERE correo = ?", (data['email'],))
+        if cursor.fetchone():
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "status": "error",
+                "message": "El correo electrónico ya está registrado"
+            }), 400
+            
+        # Verificar si el número de documento ya existe
+        cursor.execute("SELECT id FROM usuarios WHERE num_documento = ?", (data['num_documento'],))
+        if cursor.fetchone():
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "status": "error",
+                "message": "El número de documento ya está registrado"
+            }), 400
+        
+        # Insertar el nuevo usuario
+        cursor.execute("""
+            INSERT INTO usuarios (
+                nombres, apellidos, tipo_documento, num_documento,
+                celular, correo, contrasena, tipo_usuario,
+                estado, intentos_fallidos
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'activa', 0)
+        """, (
+            data['nombres'], data['apellidos'], data['tipo_documento'],
+            data['num_documento'], data['celular'], data['email'],
+            data['password'], data['tipo_usuario']
+        ))
+        
+        connection.commit()
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Usuario creado exitosamente"
+        })
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/usuarios/update/<int:user_id>', methods=['PUT'])
+def actualizar_usuario(user_id):
+    try:
+        data = request.json
+        connection = db_manager.get_connection()
+        cursor = connection.cursor()
+        
+        # Verificar si el correo ya existe para otro usuario
+        cursor.execute("SELECT id FROM usuarios WHERE correo = ? AND id != ?", 
+                    (data['email'], user_id))
+        if cursor.fetchone():
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "status": "error",
+                "message": "El correo electrónico ya está registrado por otro usuario"
+            }), 400
+            
+        # Verificar si el número de documento ya existe para otro usuario
+        cursor.execute("SELECT id FROM usuarios WHERE num_documento = ? AND id != ?", 
+                    (data['num_documento'], user_id))
+        if cursor.fetchone():
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "status": "error",
+                "message": "El número de documento ya está registrado por otro usuario"
+            }), 400
+        
+        # Actualizar el usuario
+        cursor.execute("""
+            UPDATE usuarios 
+            SET nombres = ?, 
+                apellidos = ?,
+                tipo_documento = ?,
+                num_documento = ?,
+                celular = ?,
+                correo = ?,
+                tipo_usuario = ?
+            WHERE id = ?
+        """, (
+            data['nombres'], data['apellidos'], data['tipo_documento'],
+            data['num_documento'], data['celular'], data['email'],
+            data['tipo_usuario'], user_id
+        ))
+        
+        connection.commit()
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Usuario actualizado exitosamente"
+        })
+        
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/usuario/actualizar', methods=['POST'])
+def actualizar_perfil_usuario():
+    if 'user_id' not in session:
+        return jsonify({"status": "error", "message": "No hay sesión activa"}), 401
+    
+    try:
+        data = request.json
+        connection = db_manager.get_connection()
+        cursor = connection.cursor()
+
+        # Verificar si el correo ya existe para otro usuario
+        if 'email' in data:
+            cursor.execute("SELECT id FROM usuarios WHERE correo = ? AND id != ?", 
+                        (data['email'], session['user_id']))
+            if cursor.fetchone():
+                cursor.close()
+                connection.close()
+                return jsonify({
+                    "status": "error", 
+                    "message": "El correo ya está registrado por otro usuario"
+                }), 400
+
+        # Actualizar los datos del usuario
+        update_query = """
+            UPDATE usuarios 
+            SET nombres = ?,
+                apellidos = ?,
+                correo = ?,
+                celular = ?
+            WHERE id = ?
+        """
+        cursor.execute(update_query, (
+            data['nombres'],
+            data['apellidos'],
+            data['email'],
+            data['celular'],
+            session['user_id']
+        ))
+        
+        connection.commit()
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Perfil actualizado correctamente"
+        })
+
+    except Exception as e:
+        print(f"Error actualizando perfil: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "message": f"Error al actualizar el perfil: {str(e)}"
+        }), 500
+
 @app.route('/api/actualizar-password', methods=['POST'])
 def actualizar_password():
     data = request.json
@@ -316,19 +508,49 @@ def update_reservation_status(reserva_id):
         connection = db_manager.get_connection()
         cursor = connection.cursor()
         
+        # Obtener el ID de la mesa antes de actualizar la reserva
+        cursor.execute("SELECT mesa_id FROM reservas WHERE id = ?", (reserva_id,))
+        resultado = cursor.fetchone()
+        if not resultado:
+            cursor.close()
+            connection.close()
+            return jsonify({"status": "error", "message": "Reserva no encontrada"}), 404
+            
+        mesa_id = resultado['mesa_id']
+        
+        # Actualizar el estado de la reserva
         cursor.execute("UPDATE reservas SET estado = ? WHERE id = ?", (nuevo_estado, reserva_id))
+        
+        # Actualizar el estado de la mesa según el nuevo estado de la reserva
+        if nuevo_estado in ['completada', 'cancelada']:
+            # Verificar si hay otras reservas activas para esta mesa
+            cursor.execute("""
+                SELECT COUNT(*) as reservas_activas 
+                FROM reservas 
+                WHERE mesa_id = ? AND estado = 'activa' AND id != ?
+            """, (mesa_id, reserva_id))
+            
+            otras_reservas = cursor.fetchone()['reservas_activas']
+            
+            if otras_reservas == 0:
+                # Si no hay otras reservas activas, marcar la mesa como disponible
+                cursor.execute("UPDATE mesas SET estado = 'disponible' WHERE id = ?", (mesa_id,))
+        
         connection.commit()
-        cursor.close()
-        connection.close()
         
         # Si la reserva se marca como completada, crear el comprobante
         if nuevo_estado == 'completada':
             success, message = db_manager.crear_comprobante(reserva_id)
             if not success:
+                cursor.close()
+                connection.close()
                 return jsonify({
                     "status": "warning",
                     "message": f"Reserva completada pero hubo un error al crear el comprobante: {message}"
                 })
+        
+        cursor.close()
+        connection.close()
         
         return jsonify({
             "status": "success",

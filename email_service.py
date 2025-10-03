@@ -212,6 +212,127 @@ class EmailService:
         except Exception as e:
             return {"status": "error", "message": f"Error al enviar el correo: {str(e)}"}
 
+    def enviar_correo_reserva(self, destinatario, nombre, fecha, hora, num_personas, platos=None):
+        try:
+            mensaje = MIMEMultipart('alternative')
+            mensaje["From"] = f"Restaurant JP Gourmet <{self.sender_email}>"
+            mensaje["To"] = destinatario
+            mensaje["Subject"] = "Confirmación de Reserva - Restaurant JP Gourmet"
+            mensaje["Reply-To"] = self.sender_email
+            mensaje["Message-ID"] = f"<{self.generate_message_id()}>"
+            mensaje["Date"] = formatdate(localtime=True)
+
+            # Formatear lista de platos si existe
+            platos_html = ""
+            if platos and len(platos) > 0:
+                platos_html = """
+                <div style="margin: 20px 0;">
+                    <h3 style="color: #B8860B;">Platos seleccionados:</h3>
+                    <ul>
+                """
+                total = 0
+                for plato in platos:
+                    subtotal = plato['precio'] * plato['cantidad']
+                    total += subtotal
+                    platos_html += f"<li>{plato['cantidad']}x {plato['nombre']} - ${subtotal:,.0f}</li>"
+                
+                platos_html += f"""
+                    </ul>
+                    <p><strong>Total del pedido:</strong> ${total:,.0f}</p>
+                </div>
+                """
+
+            cuerpo = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body {{
+                        font-family: Arial, sans-serif;
+                        line-height: 1.6;
+                        color: #333333;
+                    }}
+                    .container {{
+                        max-width: 600px;
+                        margin: 0 auto;
+                        padding: 20px;
+                        background-color: #f8f9fa;
+                    }}
+                    .header {{
+                        background-color: #B8860B;
+                        color: white;
+                        text-align: center;
+                        padding: 20px;
+                        border-radius: 5px 5px 0 0;
+                    }}
+                    .content {{
+                        background-color: white;
+                        padding: 30px;
+                        border-radius: 0 0 5px 5px;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    }}
+                    .reservation-details {{
+                        background-color: #f8f9fa;
+                        padding: 20px;
+                        border-radius: 5px;
+                        margin: 20px 0;
+                    }}
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🍽️ Restaurant JP Gourmet</h1>
+                    </div>
+                    <div class="content">
+                        <h2 style="color: #B8860B;">¡Reserva Confirmada!</h2>
+                        <p>Hola {nombre},</p>
+                        <p>Tu reserva ha sido confirmada exitosamente. Aquí están los detalles:</p>
+                        
+                        <div class="reservation-details">
+                            <p><strong>Fecha:</strong> {fecha}</p>
+                            <p><strong>Hora:</strong> {hora}</p>
+                            <p><strong>Número de personas:</strong> {num_personas}</p>
+                        </div>
+                        
+                        {platos_html}
+
+                        <p>Si necesitas hacer algún cambio en tu reserva, por favor contáctanos lo antes posible.</p>
+                        
+                        <div style="margin-top: 20px;">
+                            <p style="color: #666; font-size: 12px;">
+                                * Te recomendamos llegar 10 minutos antes de tu reserva.<br>
+                                * La mesa se mantendrá reservada hasta 15 minutos después de la hora programada.
+                            </p>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 30px; color: #666;">
+                            <p>¡Gracias por elegir Restaurant JP Gourmet!</p>
+                            <p>📞 (57) 305 500 55 60</p>
+                        </div>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+
+            # Agregar versión texto plano
+            text_version = self.create_text_version(cuerpo)
+            mensaje.attach(MIMEText(text_version, 'plain', 'utf-8'))
+            mensaje.attach(MIMEText(cuerpo, 'html', 'utf-8'))
+
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as servidor:
+                servidor.ehlo()
+                servidor.starttls()
+                servidor.ehlo()
+                servidor.login(self.sender_email, self.sender_password)
+                time.sleep(1)
+                servidor.send_message(mensaje)
+
+            return {"status": "success", "message": "Correo de confirmación enviado exitosamente"}
+        except Exception as e:
+            return {"status": "error", "message": f"Error al enviar el correo: {str(e)}"}
+
     def enviar_correo_recuperacion(self, destinatario, token):
         try:
             mensaje = MIMEMultipart('alternative')

@@ -10,142 +10,14 @@
     <!-- Bootstrap + Pigga main styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pigga.css')}}">
 </head>
-<style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: url("{{ url_for('static', filename='assets/imgs/logoShort.PNG') }}") no-repeat center center fixed;
-        background-size: cover;
-        position: relative;
-    }
-
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        z-index: -1;
-    }
-
-    .logo {
-        width: 300px;
-        height: 300px;
-        object-fit: contain;
-        border-radius: 50%;
-        -webkit-mask-image: radial-gradient(ellipse at center,
-                black 45%,
-                rgba(0, 0, 0, 0.7) 50%,
-                rgba(0, 0, 0, 0.5) 55%,
-                rgba(0, 0, 0, 0.2) 60%,
-                transparent 70%);
-        mask-image: radial-gradient(ellipse at center,
-                black 45%,
-                rgba(0, 0, 0, 0.7) 50%,
-                rgba(0, 0, 0, 0.5) 55%,
-                rgba(0, 0, 0, 0.2) 60%,
-                transparent 70%);
-    }
-
-    /* Estilos para el modal de edición de perfil */
-    .modal-perfil {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        animation: fadeIn 0.3s ease;
-    }
-
-    .modal-perfil .modal-content {
-        background-color: #2c2c2c;
-        margin: 15% auto;
-        padding: 20px;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 500px;
-        position: relative;
-        animation: slideIn 0.3s ease;
-        color: white;
-    }
-
-    .modal-perfil .close {
-        position: absolute;
-        right: 20px;
-        top: 15px;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-        color: #fff;
-        transition: color 0.3s ease;
-    }
-
-    .modal-perfil .close:hover {
-        color: #bc8c4c;
-    }
-
-    .modal-perfil .form-group {
-        margin-bottom: 15px;
-    }
-
-    .modal-perfil .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        color: #fff;
-        font-weight: 500;
-    }
-
-    .modal-perfil .form-group input {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #bc8c4c;
-        border-radius: 4px;
-        font-size: 1rem;
-        background-color: #333;
-        color: white;
-        transition: border-color 0.3s ease;
-    }
-
-    .modal-perfil .form-group input:focus {
-        border-color: #d4a017;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(188, 140, 76, 0.25);
-    }
-
-    .modal-perfil .botones {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
+    <!-- Agregar referencia al nuevo archivo CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/main.css') }}">
+    <style>
+        /* Solo mantener los estilos específicos que requieren variables de Flask */
+        body {
+            background: url("{{ url_for('static', filename='assets/imgs/logoShort.PNG') }}") no-repeat center center fixed;
         }
-
-        to {
-            opacity: 1;
-        }
-    }
-
-    @keyframes slideIn {
-        from {
-            transform: translateY(-20px);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-</style>
+    </style>
 
 <body data-spy="scroll" data-target=".navbar" data-offset="40" id="home">
 
@@ -166,13 +38,21 @@
                 </ul>
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
-                        <a href="{{ url_for('reservas') }}" class="btn btn-primary btn-sm mr-2">Reservar</a>
+                        <form action="{{ url_for('reservas') }}" method="get" style="display: inline;">
+                            <button type="submit" class="btn btn-primary btn-sm mr-2" style="background-color: #bc8c4c; border-color: #bc8c4c; transition: all 0.3s ease;">
+                                <i class="ti-calendar"></i> Reservar
+                            </button>
+                        </form>
                     </li>
                     <li class="nav-item">
-                        <button onclick="abrirModalPerfil()" class="btn btn-primary btn-sm mr-2">Editar perfil</button>
+                        <button onclick="abrirModalPerfil()" class="btn btn-primary btn-sm mr-2" style="background-color: #bc8c4c; border-color: #bc8c4c; transition: all 0.3s ease;">
+                            <i class="ti-user"></i> Editar perfil
+                        </button>
                     </li>
                     <li class="nav-item">
-                        <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">Cerrar Sesión</button>
+                        <button onclick="cerrarSesion()" class="btn btn-danger btn-sm">
+                            <i class="ti-power-off"></i> Cerrar Sesión
+                        </button>
                     </li>
                 </ul>
             </div>
@@ -183,7 +63,7 @@
     <!-- Header con logo -->
     <header class="header">
         <div class="overlay">
-            <img src="{{ url_for('static', filename='assets/imgs/logoShort.PNG')}}" class="logo">
+            <img src="{{ url_for('static', filename='assets/imgs/logoShort.PNG')}}" class="cliente-logo">
             <h1 class="subtitle">Bienvenido a tu panel de cliente</h1>
             <h1 class="title">JP gourmet have restaurant</h1>
         </div>
@@ -481,6 +361,8 @@
             </div>
         </div>
     </footer>
+    <!-- Contenedor de notificaciones -->
+    <div id="notificacionContainer" class="cliente-notificacion-container"></div>
     <!-- End of Page Footer -->
 
     <!-- core  -->
@@ -495,6 +377,36 @@
 
     <!-- Scripts -->
     <script>
+        // Función para mostrar notificaciones estilizadas
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const container = document.getElementById('notificacionContainer');
+            const notificacion = document.createElement('div');
+            notificacion.className = `cliente-notificacion ${tipo}`;
+            
+            // Agregar ícono según el tipo
+            const icono = tipo === 'success' ? 'ti-check' : 'ti-alert';
+            
+            notificacion.innerHTML = `
+                <div class="mensaje">
+                    <i class="${icono}"></i>
+                    ${mensaje}
+                </div>
+                <button class="cerrar" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            container.appendChild(notificacion);
+            
+            // Animar salida después de 5 segundos
+            setTimeout(() => {
+                notificacion.style.animation = 'fadeOut 0.5s ease-out forwards';
+                setTimeout(() => {
+                    if (notificacion.parentElement) {
+                        notificacion.remove();
+                    }
+                }, 500);
+            }, 5000);
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             // Cargar datos del usuario al iniciar la página
             cargarDatosUsuario();
@@ -585,14 +497,14 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    alert('Perfil actualizado correctamente');
+                    mostrarNotificacion('¡Perfil actualizado exitosamente!', 'success');
                     cerrarModalPerfil();
                 } else {
-                    alert(result.message || 'Error al actualizar el perfil');
+                    mostrarNotificacion(result.message || 'Error al actualizar el perfil', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al actualizar el perfil');
+                mostrarNotificacion('Error al conectar con el servidor', 'error');
             }
         }
 

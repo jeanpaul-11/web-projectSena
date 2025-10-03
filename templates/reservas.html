@@ -23,7 +23,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto"> 
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Inicio</a>
+                        <a class="nav-link" href="/clientes">Inicio</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-primary">Contactanos : <span class="pl-2 text-muted">(57) 305 500 55 60</span></a>
@@ -44,10 +44,10 @@
                     <h3 class="section-title mb-4">Reserva tu mesa</h3>
                     <form id="reservaForm">
                         <div class="form-group">
-                            <input type="text" class="form-control" id="name" name="name" placeholder="Tu nombre" required>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Tu nombre" required readonly>
                         </div>
                         <div class="form-group">
-                            <input type="tel" class="form-control" name="phone" placeholder="Tu teléfono" required>
+                            <input type="tel" class="form-control" id="phone" name="phone" placeholder="Tu teléfono" required readonly>
                         </div>
                         <div class="form-group">
                             <input type="date" class="form-control" name="fecha" id="fecha" required>
@@ -174,15 +174,19 @@
     <div class="modal fade" id="reservaExitosaModal" tabindex="-1" aria-labelledby="reservaExitosaLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content text-center">
-            <div class="modal-header">
-              <h5 class="modal-title w-100" id="reservaExitosaLabel">Reserva realizada</h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            <div class="modal-header bg-success text-white">
+              <h5 class="modal-title w-100" id="reservaExitosaLabel">¡Reserva Exitosa!</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
-              <p class="mb-0">¡Reserva realizada con éxito!</p>
+              <div class="my-4">
+                <i class="ti-check-box text-success" style="font-size: 3rem;"></i>
+                <p class="mt-3 mb-0">Tu reserva ha sido realizada exitosamente.</p>
+                <p class="text-muted small">Serás redirigido a la página principal al cerrar este mensaje.</p>
+              </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Aceptar</button>
+            <div class="modal-footer justify-content-center">
+              <button type="button" class="btn btn-success px-4" onclick="window.location.href='/clientes'">Aceptar</button>
             </div>
           </div>
         </div>
@@ -212,6 +216,26 @@
 
     <!-- Categorías js -->
     <script src="{{ url_for('static', filename='assets/js/categorias.js')}}"></script>
+
+    <script>
+    // Obtener datos del usuario cuando carga la página
+    window.addEventListener('DOMContentLoaded', async function() {
+        try {
+            const response = await fetch('/api/usuario/datos');
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                // Autocompletar los campos con los datos del usuario
+                document.getElementById('name').value = `${data.data.nombres} ${data.data.apellidos}`;
+                document.getElementById('phone').value = data.data.celular;
+            } else {
+                console.error('Error al obtener datos del usuario:', data.message);
+            }
+        } catch (error) {
+            console.error('Error al obtener datos del usuario:', error);
+        }
+    });
+    </script>
 
     <!-- Modal de Selección de Platos -->
     <div id="modalPlatos" class="modal fade" tabindex="-1">
@@ -491,31 +515,20 @@
                 });
 
                 const result = await response.json();
-                const mensajeDiv = document.getElementById('mensajeReserva');
                 
                 if (response.ok) {
-                    mensajeDiv.className = 'alert alert-success mt-3';
-                    mensajeDiv.textContent = '¡Reserva realizada con éxito!';
                     cerrarVentana();
-
-                    const modal = new bootstrap.Modal(document.getElementById('reservaExitosaModal'));
-                    modal.show();
-
-                    document.getElementById('btnAceptar').onclick = window.location.href = "{{ url_for('clientes') }}";;
-                    // Cuando haga clic en el overlay (fuera del modal)
-                    document.getElementById('overlay').onclick = window.location.href = "{{ url_for('clientes') }}";;
-
+                    
+                    // Mostrar modal de éxito
+                    const modalExitoso = new bootstrap.Modal(document.getElementById('reservaExitosaModal'));
+                    modalExitoso.show();
                 } else {
-                    mensajeDiv.className = 'alert alert-danger mt-3';
-                    mensajeDiv.textContent = result.error || 'Error al realizar la reserva';
+                    // Mostrar error en un alert
+                    alert(result.error || 'Error al realizar la reserva');
                 }
-                mensajeDiv.style.display = 'block';
             } catch (error) {
                 console.error('Error:', error);
-                const mensajeDiv = document.getElementById('mensajeReserva');
-                mensajeDiv.className = 'alert alert-danger mt-3';
-                mensajeDiv.textContent = 'Error al conectar con el servidor';
-                mensajeDiv.style.display = 'block';
+                alert('Error al conectar con el servidor');
             }
         }
     </script>

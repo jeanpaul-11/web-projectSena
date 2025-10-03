@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 
+<!--UPDATE alimentos
+SET url_imagen = 'assets/imgs/fileteSalsa.jpg'
+WHERE id = 1;-->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +12,79 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pigga.css')}}">
     <style>
+        /* Estilos para las notificaciones */
+        .notificacion-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .notificacion {
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            min-width: 300px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .notificacion.success {
+            background: #28a745;
+            border-left: 4px solid #1e7e34;
+        }
+
+        .notificacion.error {
+            background: #dc3545;
+            border-left: 4px solid #bd2130;
+        }
+
+        .notificacion .mensaje {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notificacion .mensaje i {
+            font-size: 18px;
+        }
+
+        .notificacion .cerrar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
         * {
             -webkit-user-select: none;
             -moz-user-select: none;
@@ -377,6 +453,7 @@
                     <p>{{ usuarios.bloqueados }}</p>
                 </div>
             </div>
+            <button class="btn btn-primary mb-3" onclick="abrirModalNuevoUsuario()">Agregar nuevo usuario</button>
             <div class="table-responsive">
                 <table class="admin-table">
                     <thead>
@@ -408,6 +485,8 @@
                                     <button class="btn btn-success btn-sm"
                                         onclick="toggleUserStatus('{{ usuario.id }}', this)">Activar</button>
                                     {% endif %}
+                                    <button class="btn btn-info btn-sm"
+                                        onclick="editarUsuario('{{ usuario.id }}')">Editar</button>
                                 </div>
                             </td>
                         </tr>
@@ -729,10 +808,43 @@
             </form>
         </div>
     </div>
+    <!-- Contenedor de notificaciones -->
+    <div id="notificacionContainer" class="notificacion-container"></div>
+
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='assets/vendors/jquery/jquery-3.4.1.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/vendors/bootstrap/bootstrap.bundle.js') }}"></script>
     <script>
+        // Función para mostrar notificaciones estilizadas
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const container = document.getElementById('notificacionContainer');
+            const notificacion = document.createElement('div');
+            notificacion.className = `notificacion ${tipo}`;
+            
+            // Agregar ícono según el tipo
+            const icono = tipo === 'success' ? 'ti-check' : 'ti-alert';
+            
+            notificacion.innerHTML = `
+                <div class="mensaje">
+                    <i class="${icono}"></i>
+                    ${mensaje}
+                </div>
+                <button class="cerrar" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            container.appendChild(notificacion);
+            
+            // Animar salida después de 5 segundos
+            setTimeout(() => {
+                notificacion.style.animation = 'fadeOut 0.5s ease-out forwards';
+                setTimeout(() => {
+                    if (notificacion.parentElement) {
+                        notificacion.remove();
+                    }
+                }, 500);
+            }, 5000);
+        }
+
         async function guardarNuevaMesa(event) {
             event.preventDefault();
 
@@ -752,15 +864,15 @@
                 const result = await response.json();
 
                 if (result.status === "success") {
-                    alert("Mesa agregada correctamente ✅");
+                    mostrarNotificacion("Mesa agregada correctamente ✅");
                     cerrarModalMesa();
                     location.reload(); // recargar para ver la nueva mesa en la tabla
                 } else {
-                    alert("Error: " + result.message);
+                    mostrarNotificacion(result.message, "error");
                 }
             } catch (err) {
                 console.error("Error al guardar mesa:", err);
-                alert("Error al conectar con el servidor.");
+                mostrarNotificacion("Error al conectar con el servidor", "error");
             }
         }
         function abrirModalNuevaMesa() {
@@ -817,15 +929,15 @@
                 const result = await response.json();
 
                 if (result.status === "success") {
-                    alert("Mesa actualizada correctamente ✅");
+                    mostrarNotificacion("Mesa actualizada correctamente ✅");
                     cerrarModalEditarMesa();
                     location.reload();
                 } else {
-                    alert("Error: " + result.message);
+                    mostrarNotificacion(result.message, "error");
                 }
             } catch (err) {
                 console.error("Error al guardar cambios de mesa:", err);
-                alert("Error al conectar con el servidor.");
+                mostrarNotificacion("Error al conectar con el servidor", "error");
             }
             return false;
         }
@@ -856,16 +968,31 @@
                     const comprobante = result.data;
                     const detallesHTML = `
                         <div class="comprobante-details">
-                            <p><strong>Cliente:</strong> ${comprobante.nombres} ${comprobante.apellidos}</p>
+                            <h3>COMPROBANTE DE VENTA</h3>
+                            <p><strong>Fecha de Emisión:</strong> ${new Date(comprobante.fecha_emision).toLocaleString()}</p>
+                            <hr>
+                            <h4>Datos del Cliente</h4>
+                            <p><strong>Nombre:</strong> ${comprobante.nombres} ${comprobante.apellidos}</p>
                             <p><strong>Documento:</strong> ${comprobante.num_documento}</p>
                             <p><strong>Contacto:</strong></p>
                             <ul>
                                 <li>Celular: ${comprobante.celular}</li>
                                 <li>Correo: ${comprobante.correo}</li>
                             </ul>
-                            <p><strong>Productos:</strong> ${comprobante.nombre_producto}</p>
-                            <p><strong>Subtotal:</strong> ${formatCurrency(comprobante.subtotal)}</p>
-                            <p><strong>Total (IVA 19%):</strong> ${formatCurrency(comprobante.total)}</p>
+                            <hr>
+                            <h4>Datos de la Reserva</h4>
+                            <p><strong>Fecha:</strong> ${comprobante.fecha}</p>
+                            <p><strong>Hora:</strong> ${comprobante.hora}</p>
+                            <p><strong>Mesa:</strong> ${comprobante.mesa_ubicacion}</p>
+                            <hr>
+                            <h4>Detalle de Consumo</h4>
+                            <p>${comprobante.productos.split(',').join('<br>')}</p>
+                            <hr>
+                            <div style="text-align: right;">
+                                <p><strong>Subtotal:</strong> ${formatCurrency(comprobante.subtotal)}</p>
+                                <p><strong>IVA (19%):</strong> ${formatCurrency(comprobante.total - comprobante.subtotal)}</p>
+                                <p style="font-size: 1.2em;"><strong>Total:</strong> ${formatCurrency(comprobante.total)}</p>
+                            </div>
                         </div>
                     `;
 
@@ -904,7 +1031,7 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cerrar sesión');
+                mostrarNotificacion('Error al cerrar sesión', 'error');
             }
         }
 
@@ -1083,18 +1210,248 @@
 
                 const result = await response.json();
                 if (result.status === "success") {
-                    alert('Plato agregado exitosamente');
+                    mostrarNotificacion('Plato agregado exitosamente');
                     cerrarModalPlato();
                     window.location.reload();
                 } else {
-                    alert(result.message || 'Error al guardar el plato');
+                    mostrarNotificacion(result.message || 'Error al guardar el plato', 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al guardar el plato');
+                mostrarNotificacion('Error al guardar el plato', 'error');
+            }
+        }
+        /* Modal de editar usuario */
+        async function editarUsuario(id) {
+            try {
+                const response = await fetch(`/api/usuario/${id}/detalles`);
+                const result = await response.json();
+                
+                if (result.status === "success") {
+                    const usuario = result.data;
+                    document.getElementById("editar_usuario_id").value = usuario.id;
+                    document.getElementById("editar_usuario_nombres").value = usuario.nombres;
+                    document.getElementById("editar_usuario_apellidos").value = usuario.apellidos;
+                    document.getElementById("editar_usuario_tipo_documento").value = usuario.tipo_documento;
+                    document.getElementById("editar_usuario_num_documento").value = usuario.num_documento;
+                    document.getElementById("editar_usuario_celular").value = usuario.celular;
+                    document.getElementById("editar_usuario_email").value = usuario.correo;
+                    document.getElementById("editar_usuario_tipo").value = usuario.tipo_usuario;
+                    
+                    document.getElementById("modalEditarUsuario").style.display = "block";
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cargar los datos del usuario');
+            }
+        }
+
+        function abrirModalNuevoUsuario() {
+            document.getElementById('modalNuevoUsuario').style.display = 'block';
+        }
+
+        function cerrarModalNuevoUsuario() {
+            document.getElementById('modalNuevoUsuario').style.display = 'none';
+            document.getElementById('formNuevoUsuario').reset();
+        }
+
+        function cerrarModalEditarUsuario() {
+            document.getElementById('modalEditarUsuario').style.display = 'none';
+        }
+
+        async function guardarNuevoUsuario(event) {
+            event.preventDefault();
+            
+            const formData = {
+                nombres: document.getElementById('nuevo_usuario_nombres').value,
+                apellidos: document.getElementById('nuevo_usuario_apellidos').value,
+                tipo_documento: document.getElementById('nuevo_usuario_tipo_documento').value,
+                num_documento: document.getElementById('nuevo_usuario_num_documento').value,
+                celular: document.getElementById('nuevo_usuario_celular').value,
+                email: document.getElementById('nuevo_usuario_email').value,
+                tipo_usuario: document.getElementById('nuevo_usuario_tipo').value,
+                password: document.getElementById('nuevo_usuario_password').value
+            };
+
+            try {
+                const response = await fetch('/api/usuarios/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.status === "success") {
+                    mostrarNotificacion('Usuario agregado exitosamente');
+                    cerrarModalNuevoUsuario();
+                    window.location.reload();
+                } else {
+                    mostrarNotificacion(result.message || 'Error al agregar el usuario', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al agregar el usuario', 'error');
+            }
+        }
+
+        async function guardarEdicionUsuario(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('editar_usuario_id').value;
+            const formData = {
+                nombres: document.getElementById('editar_usuario_nombres').value,
+                apellidos: document.getElementById('editar_usuario_apellidos').value,
+                tipo_documento: document.getElementById('editar_usuario_tipo_documento').value,
+                num_documento: document.getElementById('editar_usuario_num_documento').value,
+                celular: document.getElementById('editar_usuario_celular').value,
+                email: document.getElementById('editar_usuario_email').value,
+                tipo_usuario: document.getElementById('editar_usuario_tipo').value
+            };
+
+            try {
+                const response = await fetch(`/api/usuarios/update/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+                if (result.status === "success") {
+                    mostrarNotificacion('Usuario actualizado exitosamente');
+                    cerrarModalEditarUsuario();
+                    window.location.reload();
+                } else {
+                    mostrarNotificacion(result.message || 'Error al actualizar el usuario', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarNotificacion('Error al actualizar el usuario', 'error');
             }
         }
     </script>
+    
+    <!-- Modal de Editar Usuario -->
+    <div id="modalEditarUsuario" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalEditarUsuario()">&times;</span>
+            <h2>Editar Usuario</h2>
+            <form id="formEditarUsuario" onsubmit="guardarEdicionUsuario(event)">
+                <input type="hidden" id="editar_usuario_id">
+                
+                <div class="form-group">
+                    <label for="editar_usuario_nombres">Nombres:</label>
+                    <input type="text" id="editar_usuario_nombres" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editar_usuario_apellidos">Apellidos:</label>
+                    <input type="text" id="editar_usuario_apellidos" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editar_usuario_tipo_documento">Tipo de Documento:</label>
+                    <select id="editar_usuario_tipo_documento" required>
+                        <option value="CC">Cédula de Ciudadanía</option>
+                        <option value="TI">Tarjeta de Identidad</option>
+                        <option value="CE">Cédula de Extranjería</option>
+                        <option value="PAS">Pasaporte</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editar_usuario_num_documento">Número de Documento:</label>
+                    <input type="text" id="editar_usuario_num_documento" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editar_usuario_celular">Celular:</label>
+                    <input type="text" id="editar_usuario_celular" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editar_usuario_email">Email:</label>
+                    <input type="email" id="editar_usuario_email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editar_usuario_tipo">Tipo de Usuario:</label>
+                    <select id="editar_usuario_tipo" required>
+                        <option value="0">Cliente</option>
+                        <option value="1">Empleado</option>
+                        <option value="2">Administrador</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Nuevo Usuario -->
+    <div id="modalNuevoUsuario" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalNuevoUsuario()">&times;</span>
+            <h2>Agregar Nuevo Usuario</h2>
+            <form id="formNuevoUsuario" onsubmit="guardarNuevoUsuario(event)">
+                <div class="form-group">
+                    <label for="nuevo_usuario_nombres">Nombres:</label>
+                    <input type="text" id="nuevo_usuario_nombres" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nuevo_usuario_apellidos">Apellidos:</label>
+                    <input type="text" id="nuevo_usuario_apellidos" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nuevo_usuario_tipo_documento">Tipo de Documento:</label>
+                    <select id="nuevo_usuario_tipo_documento" required>
+                        <option value="CC">Cédula de Ciudadanía</option>
+                        <option value="TI">Tarjeta de Identidad</option>
+                        <option value="CE">Cédula de Extranjería</option>
+                        <option value="PAS">Pasaporte</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nuevo_usuario_num_documento">Número de Documento:</label>
+                    <input type="text" id="nuevo_usuario_num_documento" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nuevo_usuario_celular">Celular:</label>
+                    <input type="text" id="nuevo_usuario_celular" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nuevo_usuario_email">Email:</label>
+                    <input type="email" id="nuevo_usuario_email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nuevo_usuario_tipo">Tipo de Usuario:</label>
+                    <select id="nuevo_usuario_tipo" required>
+                        <option value="0">Cliente</option>
+                        <option value="1">Empleado</option>
+                        <option value="2">Administrador</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nuevo_usuario_password">Contraseña:</label>
+                    <input type="password" id="nuevo_usuario_password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Crear Usuario</button>
+            </form>
+        </div>
+    </div>
 </body>
 
 </html>

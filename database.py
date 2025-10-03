@@ -99,6 +99,9 @@ class DatabaseManager:
             cursor.execute("""
                 SELECT 
                     r.id as reserva_id, 
+                    r.fecha,
+                    r.hora,
+                    m.ubicacion as mesa_ubicacion,
                     u.nombres, 
                     u.apellidos, 
                     u.num_documento, 
@@ -107,9 +110,11 @@ class DatabaseManager:
                     c.subtotal,
                     c.total,
                     c.fecha_emision,
-                    GROUP_CONCAT(a.nombre || ' (x' || p.cantidad || ')') as productos
+                    GROUP_CONCAT(a.nombre || ' (x' || p.cantidad || ' = $' || (a.precio * p.cantidad) || ')') as productos,
+                    GROUP_CONCAT(a.nombre || ' x' || p.cantidad) as nombre_producto
                 FROM reservas r
                 JOIN usuarios u ON r.cliente_id = u.id
+                JOIN mesas m ON r.mesa_id = m.id
                 JOIN comprobantes c ON r.id = c.reserva_id
                 LEFT JOIN pedidos p ON r.id = p.reserva_id
                 LEFT JOIN alimentos a ON p.alimento_id = a.id
@@ -141,9 +146,17 @@ class DatabaseManager:
             connection = self.get_connection()
             cursor = connection.cursor()
             
+            # Verificar si ya existe un comprobante para esta reserva
+            cursor.execute("SELECT id FROM comprobantes WHERE reserva_id = ?", (reserva_id,))
+            if cursor.fetchone():
+                cursor.close()
+                connection.close()
+                return False, "Ya existe un comprobante para esta reserva"
+            
             # Obtener información de los pedidos y calcular el total
             cursor.execute("""
-                SELECT SUM(a.precio * p.cantidad) as subtotal
+                SELECT SUM(a.precio * p.cantidad) as subtotal, 
+                       GROUP_CONCAT(a.nombre || ' x' || p.cantidad) as nombre_producto
                 FROM pedidos p
                 JOIN alimentos a ON p.alimento_id = a.id
                 WHERE p.reserva_id = ?
@@ -154,8 +167,10 @@ class DatabaseManager:
             
             if not result:
                 subtotal = 0
+                nombre_producto = "Sin productos"
             else:
                 subtotal = result['subtotal']
+                nombre_producto = result['nombre_producto']
             
             total = subtotal * 1.19  # Incluyendo IVA del 19%
             
@@ -387,6 +402,9 @@ class DatabaseManager:
             print(f"Error insertando reserva: {e}")
 
     def crear_reserva(self, cliente_id, fecha, hora, num_personas, alimentos=None):
+        from email_service import EmailService
+        email_service = EmailService()
+        
         try:
             connection = self.get_connection()
             cursor = connection.cursor()
@@ -409,6 +427,14 @@ class DatabaseManager:
             
             mesa_id = mesa['id']
             
+            # Obtener información del cliente
+            cursor.execute("SELECT nombres, apellidos, correo FROM usuarios WHERE id = ?", (cliente_id,))
+            cliente = cursor.fetchone()
+            if not cliente:
+                cursor.close()
+                connection.close()
+                return False, "Cliente no encontrado"
+            
             # Crear la reserva
             cursor.execute("""
                 INSERT INTO reservas (cliente_id, mesa_id, fecha, hora, num_personas, estado)
@@ -417,6 +443,9 @@ class DatabaseManager:
             
             reserva_id = cursor.lastrowid
             
+            # Lista para almacenar detalles de platos para el correo
+            platos_email = []
+            
             # Si hay alimentos seleccionados, registrarlos
             if alimentos:
                 for alimento in alimentos:
@@ -424,6 +453,16 @@ class DatabaseManager:
                         INSERT INTO pedidos (reserva_id, alimento_id, cantidad)
                         VALUES (?, ?, ?)
                     """, (reserva_id, alimento['id'], alimento['cantidad']))
+                    
+                    # Obtener información del plato para el correo
+                    cursor.execute("SELECT nombre, precio FROM alimentos WHERE id = ?", (alimento['id'],))
+                    plato_info = cursor.fetchone()
+                    if plato_info:
+                        platos_email.append({
+                            'nombre': plato_info['nombre'],
+                            'cantidad': alimento['cantidad'],
+                            'precio': plato_info['precio']
+                        })
             
             # Actualizar estado de la mesa
             cursor.execute("""
@@ -431,6 +470,18 @@ class DatabaseManager:
             """, (mesa_id,))
             
             connection.commit()
+            
+            # Enviar correo de confirmación
+            nombre_completo = f"{cliente['nombres']} {cliente['apellidos']}"
+            email_service.enviar_correo_reserva(
+                destinatario=cliente['correo'],
+                nombre=nombre_completo,
+                fecha=fecha,
+                hora=hora,
+                num_personas=num_personas,
+                platos=platos_email
+            )
+            
             cursor.close()
             connection.close()
             return True, "Reserva creada exitosamente"
