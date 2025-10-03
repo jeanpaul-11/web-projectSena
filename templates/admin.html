@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,19 +14,24 @@
             -ms-user-select: none;
             user-select: none;
         }
-        input, textarea, select {
+
+        input,
+        textarea,
+        select {
             -webkit-user-select: text !important;
             -moz-user-select: text !important;
             -ms-user-select: text !important;
             user-select: text !important;
         }
+
         body {
             margin: 0;
             padding: 0;
-            background: url("{{ url_for('static', filename='assets/imgs/logoShort.PNG') }}") no-repeat center center fixed; 
+            background: url("{{ url_for('static', filename='assets/imgs/logoShort.PNG') }}") no-repeat center center fixed;
             background-size: cover;
             position: relative;
         }
+
         body::before {
             content: '';
             position: fixed;
@@ -36,6 +42,7 @@
             background-color: rgba(0, 0, 0, 0.7);
             z-index: -1;
         }
+
         .dashboard {
             display: none;
             padding: 20px;
@@ -43,6 +50,7 @@
             background: url("{{ url_for('static', filename='assets/imgs/logoShort.PNG') }}") no-repeat center center fixed;
             background-size: cover;
         }
+
         .dashboard::before {
             content: '';
             position: absolute;
@@ -53,26 +61,31 @@
             background-color: rgba(0, 0, 0, 0.7);
             z-index: -1;
         }
+
         .dashboard.active {
             display: block;
         }
+
         .dashboard h2.section-title {
             color: white;
         }
+
         .table-responsive {
             overflow-x: auto;
             width: 100%;
             margin-bottom: 1rem;
         }
+
         .admin-table {
             width: 100%;
             background: #2c2c2c;
             border-radius: 8px;
             margin-top: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-collapse: collapse;
         }
+
         .admin-table th {
             background: #1a1a1a;
             color: white;
@@ -80,88 +93,105 @@
             text-align: left;
             white-space: nowrap;
         }
+
         .admin-table td {
             padding: 12px 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             vertical-align: middle;
             color: #ffffff;
         }
+
         .admin-table tr:hover {
             background: #333333;
         }
+
         .admin-table tr:last-child td {
             border-bottom: none;
         }
+
         /* Ajustes específicos para la columna de acciones */
         .admin-table th:last-child,
         .admin-table td:last-child {
             min-width: 250px;
             width: 250px;
         }
+
         .btn-group {
             display: flex;
             gap: 5px;
             flex-wrap: nowrap;
             justify-content: flex-start;
         }
+
         .btn-group .btn {
             padding: 0.25rem 0.5rem;
             font-size: 0.875rem;
             white-space: nowrap;
             flex: 0 0 auto;
         }
+
         .status-badge {
             padding: 5px 10px;
             border-radius: 15px;
             font-size: 0.85em;
             font-weight: 500;
         }
+
         .status-active {
             background: #28a745;
             color: white;
         }
+
         .status-blocked {
             background: #dc3545;
             color: white;
         }
+
         .status-pending {
             background: #ffc107;
             color: black;
         }
+
         .status-completed {
             background: #17a2b8;
             color: white;
         }
+
         .dashboard-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 20px;
         }
+
         .stat-card {
             background: #2c2c2c;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.2s ease;
         }
+
         .stat-card:hover {
             transform: translateY(-2px);
             background: #333333;
         }
+
         .stat-card h3 {
             margin: 0;
             color: #ffffff;
             font-size: 1.1rem;
         }
+
         .stat-card p {
             font-size: 2em;
             margin: 10px 0;
             color: #ffffff;
             font-weight: bold;
         }
+
         /* Estilos para el modal */
         .modal {
             display: none;
@@ -171,11 +201,12 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(0, 0, 0, 0.5);
             animation: fadeIn 0.3s ease;
             overflow-y: auto;
             padding: 20px 0;
         }
+
         .modal-content {
             background-color: white;
             margin: 30px auto;
@@ -188,6 +219,7 @@
             max-height: calc(100vh - 60px);
             overflow-y: auto;
         }
+
         .close {
             position: absolute;
             right: 20px;
@@ -198,18 +230,22 @@
             color: #666;
             transition: color 0.3s ease;
         }
+
         .close:hover {
             color: #000;
         }
+
         .form-group {
             margin-bottom: 15px;
         }
+
         .form-group label {
             display: block;
             margin-bottom: 5px;
             color: #343a40;
             font-weight: 500;
         }
+
         .form-group input,
         .form-group select {
             width: 100%;
@@ -219,13 +255,15 @@
             font-size: 1rem;
             transition: border-color 0.3s ease;
         }
+
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             border-color: #007bff;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
         }
+
         .form-group textarea {
             width: 100%;
             padding: 8px 12px;
@@ -235,30 +273,49 @@
             min-height: 100px;
             resize: vertical;
         }
+
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
+
         @keyframes slideIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
+
         /* Responsividad mejorada */
         @media (max-width: 768px) {
             .dashboard-stats {
                 grid-template-columns: 1fr;
             }
+
             .btn-group {
                 flex-direction: column;
             }
+
             .btn-group .btn {
                 width: 100%;
                 margin-bottom: 5px;
             }
+
             .admin-table {
                 display: block;
                 overflow-x: auto;
             }
+
             .modal-content {
                 margin: 10px;
                 width: calc(100% - 20px);
@@ -267,6 +324,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Barra de navegación -->
     <nav class="navbar custom-navbar navbar-expand-sm navbar-dark bg-dark">
@@ -274,16 +332,20 @@
             <a class="navbar-brand" href="#" style="color: #ffffff !important;">
                 Panel de Administración
             </a>
-            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+            <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
+                data-target="#navbarSupportedContent">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ml-auto"> 
+                <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="showDashboard('usuarios')">Usuarios</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="showDashboard('reservas')">Reservas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showDashboard('mesas')">Mesas</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#" onclick="showDashboard('menu')">Menú</a>
@@ -332,14 +394,18 @@
                             <td>{{ usuario.id }}</td>
                             <td>{{ usuario.nombre }}</td>
                             <td>{{ usuario.correo }}</td>
-                            <td><span class="status-badge status-{% if usuario.estado == 'activa' %}active{% else %}blocked{% endif %}">{{ usuario.estado|title }}</span></td>
+                            <td><span
+                                    class="status-badge status-{% if usuario.estado == 'activa' %}active{% else %}blocked{% endif %}">{{
+                                    usuario.estado|title }}</span></td>
                             <td>{{ usuario.tipo_usuario|title }}</td>
                             <td>
                                 <div class="btn-group">
                                     {% if usuario.estado == 'activa' %}
-                                    <button class="btn btn-warning btn-sm" onclick="toggleUserStatus('{{ usuario.id }}', this)">Bloquear</button>
+                                    <button class="btn btn-warning btn-sm"
+                                        onclick="toggleUserStatus('{{ usuario.id }}', this)">Bloquear</button>
                                     {% else %}
-                                    <button class="btn btn-success btn-sm" onclick="toggleUserStatus('{{ usuario.id }}', this)">Activar</button>
+                                    <button class="btn btn-success btn-sm"
+                                        onclick="toggleUserStatus('{{ usuario.id }}', this)">Activar</button>
                                     {% endif %}
                                 </div>
                             </td>
@@ -392,14 +458,18 @@
                             <td>{{ reserva.fecha }}</td>
                             <td>{{ reserva.hora }}</td>
                             <td>{{ reserva.num_personas }}</td>
-                            <td><span class="status-badge status-{{ reserva.estado }}">{{ reserva.estado|title }}</span></td>
+                            <td><span class="status-badge status-{{ reserva.estado }}">{{ reserva.estado|title }}</span>
+                            </td>
                             <td>
                                 <div class="btn-group">
                                     {% if reserva.estado == 'activa' %}
-                                    <button class="btn btn-success btn-sm" onclick="updateReservationStatus('{{ reserva.id }}', 'completada')">Completar</button>
-                                    <button class="btn btn-danger btn-sm" onclick="updateReservationStatus('{{ reserva.id }}', 'cancelada')">Cancelar</button>
+                                    <button class="btn btn-success btn-sm"
+                                        onclick="updateReservationStatus('{{ reserva.id }}', 'completada')">Completar</button>
+                                    <button class="btn btn-danger btn-sm"
+                                        onclick="updateReservationStatus('{{ reserva.id }}', 'cancelada')">Cancelar</button>
                                     {% else %}
-                                    <button class="btn btn-info btn-sm" onclick="verComprobante('{{ reserva.id }}')">Ver Detalles</button>
+                                    <button class="btn btn-info btn-sm" onclick="verComprobante('{{ reserva.id }}')">Ver
+                                        Detalles</button>
                                     {% endif %}
                                 </div>
                             </td>
@@ -438,8 +508,10 @@
                             <td>{{ plato.tipo_alimento }}</td>
                             <td>
                                 <div class="btn-group">
-                                    <button class="btn btn-info btn-sm" onclick="editarPlato('{{ plato.id }}')">Editar</button>
-                                    <button class="btn btn-danger btn-sm" onclick="eliminarPlato('{{ plato.id }}')">Eliminar</button>
+                                    <button class="btn btn-info btn-sm"
+                                        onclick="editarPlato('{{ plato.id }}')">Editar</button>
+                                    <button class="btn btn-danger btn-sm"
+                                        onclick="eliminarPlato('{{ plato.id }}')">Eliminar</button>
                                 </div>
                             </td>
                         </tr>
@@ -463,7 +535,8 @@
                 </div>
                 <div class="form-group">
                     <label for="editar_descripcion">Descripción:</label>
-                    <textarea id="editar_descripcion" name="editar_descripcion" class="form-control" rows="3"></textarea>
+                    <textarea id="editar_descripcion" name="editar_descripcion" class="form-control"
+                        rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="editar_tipo_alimento">Tipo de Alimento:</label>
@@ -557,17 +630,211 @@
             </form>
         </div>
     </div>
+    <div id="mesas" class="dashboard">
+        <div class="container">
+            <h2 class="section-title">Mesas</h2>
+            <button class="btn btn-primary mb-3" onclick="abrirModalNuevaMesa()">Agregar nueva mesa</button>
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>capacidad</th>
+                            <th>ubicación</th>
+                            <th>estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mesa in mesas.lista %}
+                        <tr>
+                            <td>{{ mesa.id }}</td>
+                            <td>{{ mesa.capacidad }}</td>
+                            <td>{{ mesa.ubicacion }}</td>
+                            <td>{{ mesa.estado }}</td>
+                            <td>
+                                <div class="btn-group">
+                                    <button class="btn btn-info btn-sm"
+                                        onclick="editarMesa('{{ mesa.id }}')">Editar</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    </div>
+    <div id="modalNuevaMesa" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalMesa()">&times;</span>
+            <h2>Agregar nueva mesa</h2>
+            <form id="formNuevaMesa" onsubmit="guardarNuevaMesa(event)">
 
+                <div class="form-group">
+                    <label for="capacidad">Capacidad:</label>
+                    <input type="number" id="capacidadMesa" name="capacidad" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="ubicacionMesa">Ubicación:</label>
+                    <input type="text" id="ubicacionMesa" name="ubicacion" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="estado">Estado:</label>
+                    <select id="estadoMesa" name="estado" required>
+                        <option value="disponible">disponible</option>
+                        <option value="ocupada">ocupada</option>
+                        <option value="reservada">reservada</option>
+                        <option value="mantenimiento">mantenimiento</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar Mesa</button>
+            </form>
+        </div>
+    </div>
+    <div id="modalEditarMesa" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModalEditarMesa()">&times;</span>
+            <h2>Editar mesa</h2>
+            <form id="formEditarMesa" onsubmit="return guardarEdicionMesa(event)">
+
+                <input type="hidden" id="editar_id_mesa" name="id">
+
+                <div class="form-group">
+                    <label for="editar_capacidadMesa">Capacidad:</label>
+                    <input type="number" id="editar_capacidadMesa" name="capacidad" min="1" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editar_ubicacionMesa">Ubicación:</label>
+                    <input type="text" id="editar_ubicacionMesa" name="ubicacion" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="editar_estadoMesa">Estado:</label>
+                    <select id="editar_estadoMesa" name="estado" required>
+                        <option value="disponible">disponible</option>
+                        <option value="ocupada">ocupada</option>
+                        <option value="reservada">reservada</option>
+                        <option value="mantenimiento">mantenimiento</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </form>
+        </div>
+    </div>
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='assets/vendors/jquery/jquery-3.4.1.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/vendors/bootstrap/bootstrap.bundle.js') }}"></script>
     <script>
+        async function guardarNuevaMesa(event) {
+            event.preventDefault();
+
+            const data = {
+                capacidad: document.getElementById("capacidadMesa").value,
+                ubicacion: document.getElementById("ubicacionMesa").value,
+                estado: document.getElementById("estadoMesa").value.trim().toLowerCase()
+            };
+
+            try {
+                const response = await fetch("/api/mesas/add", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    alert("Mesa agregada correctamente ✅");
+                    cerrarModalMesa();
+                    location.reload(); // recargar para ver la nueva mesa en la tabla
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch (err) {
+                console.error("Error al guardar mesa:", err);
+                alert("Error al conectar con el servidor.");
+            }
+        }
+        function abrirModalNuevaMesa() {
+            document.getElementById('modalNuevaMesa').style.display = 'block';
+        }
+
+        function cerrarModalMesa() {
+            document.getElementById('modalNuevaMesa').style.display = 'none';
+        }
+        function cerrarModalEditarMesa() {
+            document.getElementById('modalEditarMesa').style.display = 'none';
+        }
+        function editarMesa(id) {
+            fetch(`/api/mesas/${id}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        const mesa = data.mesa;
+
+                        document.getElementById("editar_id_mesa").value = mesa.id;
+                        document.getElementById("editar_capacidadMesa").value = mesa.capacidad;
+                        document.getElementById("editar_ubicacionMesa").value = mesa.ubicacion;
+                        document.getElementById("editar_estadoMesa").value = mesa.estado;
+
+                        document.getElementById("modalEditarMesa").style.display = "block";
+                    } else {
+                        alert("Error al cargar los datos de la mesa");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Error al cargar los datos de la mesa");
+                });
+        }
+
+        async function guardarEdicionMesa(event) {
+            event.preventDefault();
+
+            // Tomar valores del formulario
+            const id = document.getElementById("editar_id_mesa").value;
+            const data = {
+                capacidad: document.getElementById("editar_capacidadMesa").value,
+                ubicacion: document.getElementById("editar_ubicacionMesa").value,
+                estado: document.getElementById("editar_estadoMesa").value.trim().toLowerCase()
+            };
+
+            try {
+                const response = await fetch(`/api/mesas/update/${id}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    alert("Mesa actualizada correctamente ✅");
+                    cerrarModalEditarMesa();
+                    location.reload();
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch (err) {
+                console.error("Error al guardar cambios de mesa:", err);
+                alert("Error al conectar con el servidor.");
+            }
+            return false;
+        }
+
         function showDashboard(dashboardId) {
             // Ocultar todos los dashboards
             document.querySelectorAll('.dashboard').forEach(dashboard => {
                 dashboard.classList.remove('active');
             });
-            
+
             // Mostrar el dashboard seleccionado
             document.getElementById(dashboardId).classList.add('active');
         }
@@ -583,7 +850,7 @@
             try {
                 const response = await fetch(`/api/reservas/${reservaId}/comprobante`);
                 const result = await response.json();
-                
+
                 if (result.status === "success") {
                     const comprobante = result.data;
                     const detallesHTML = `
@@ -600,7 +867,7 @@
                             <p><strong>Total (IVA 19%):</strong> ${formatCurrency(comprobante.total)}</p>
                         </div>
                     `;
-                    
+
                     document.getElementById('detallesComprobante').innerHTML = detallesHTML;
                     document.getElementById('modalComprobante').style.display = 'block';
                 } else {
@@ -617,7 +884,7 @@
         }
 
         // Cerrar modal al hacer clic fuera de él
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modal = document.getElementById('modalComprobante');
             if (event.target == modal) {
                 modal.style.display = 'none';
@@ -647,13 +914,13 @@
                     credentials: 'include'
                 });
                 const result = await response.json();
-                
+
                 if (result.status === "success") {
                     // Actualizar el estado en la interfaz
                     const statusBadge = button.closest('tr').querySelector('.status-badge');
                     statusBadge.className = `status-badge status-${result.nuevo_estado === 'activa' ? 'active' : 'blocked'}`;
                     statusBadge.textContent = result.nuevo_estado.charAt(0).toUpperCase() + result.nuevo_estado.slice(1);
-                    
+
                     // Cambiar el botón
                     if (result.nuevo_estado === 'activa') {
                         button.className = 'btn btn-warning btn-sm';
@@ -662,7 +929,7 @@
                         button.className = 'btn btn-success btn-sm';
                         button.textContent = 'Activar';
                     }
-                    
+
                     // Recargar las estadísticas
                     window.location.reload();
                 } else {
@@ -684,7 +951,7 @@
                     credentials: 'include',
                     body: JSON.stringify({ estado: nuevoEstado })
                 });
-                
+
                 const result = await response.json();
                 if (result.status === "success") {
                     window.location.reload();
@@ -707,7 +974,7 @@
         }
 
         // Cerrar modal al hacer clic fuera de él
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             const modalComprobante = document.getElementById('modalComprobante');
             const modalPlato = document.getElementById('modalNuevoPlato');
             const modalEditarPlato = document.getElementById('modalEditarPlato');
@@ -736,7 +1003,7 @@
                         document.getElementById("editar_precio").value = plato.precio;
                         document.getElementById("editar_estado").value = plato.estado;
                         document.getElementById("editar_url_imagen").value = plato.url_imagen;
-                        
+
                         document.getElementById("modalEditarPlato").style.display = "block";
                     } else {
                         alert('Error al cargar los datos del plato');
@@ -754,7 +1021,7 @@
 
         function guardarEdicionPlato(event) {
             event.preventDefault();
-            
+
             const formData = {
                 id: document.getElementById('editar_id').value,
                 nombre: document.getElementById('editar_nombre').value,
@@ -774,25 +1041,25 @@
                 credentials: 'include',
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
-            .then(result => {
-                if (result.status === "success") {
-                    alert('Plato actualizado exitosamente');
-                    cerrarModalEditarPlato();
-                    window.location.reload();
-                } else {
-                    alert(result.message || 'Error al actualizar el plato');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error al actualizar el plato');
-            });
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === "success") {
+                        alert('Plato actualizado exitosamente');
+                        cerrarModalEditarPlato();
+                        window.location.reload();
+                    } else {
+                        alert(result.message || 'Error al actualizar el plato');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error al actualizar el plato');
+                });
         }
 
         async function guardarNuevoPlato(event) {
             event.preventDefault();
-            
+
             const formData = {
                 nombre: document.getElementById('nombre').value,
                 descripcion: document.getElementById('descripcion').value,
@@ -828,4 +1095,5 @@
         }
     </script>
 </body>
+
 </html>

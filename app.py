@@ -37,7 +37,8 @@ def empleado():
     # Obtener estadísticas para el panel del empleado
     reservas = db_manager.get_reservation_stats()
     menu = db_manager.get_menu_stats()
-    return render_template('empleado.html', title='Panel de Empleado', reservas=reservas, menu=menu)
+    mesas = db_manager.get_mesa_stats()
+    return render_template('empleado.html', title='Panel de Empleado', reservas=reservas, menu=menu, mesas=mesas)
 
 @app.route('/admin')
 def admin():
@@ -45,8 +46,8 @@ def admin():
     usuarios = db_manager.get_user_stats()
     reservas = db_manager.get_reservation_stats()
     menu = db_manager.get_menu_stats()
-    return render_template('admin.html', title='Panel de Administrador', 
-                         usuarios=usuarios, reservas=reservas, menu=menu)
+    mesas = db_manager.get_mesa_stats()
+    return render_template('admin.html', title='Panel de Administrador', usuarios=usuarios, reservas=reservas, menu=menu, mesas=mesas)
 
 @app.route('/reservas')
 def reservas():
@@ -313,6 +314,91 @@ def add_menu_item():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/api/mesas/add', methods=['POST'])
+def add_mesa():
+    try:
+        data = request.json
+        connection = db_manager.get_connection()
+        cursor = connection.cursor()
+        
+        print("Estado recibido:", repr(data.get("estado")))
+        cursor.execute("""
+            INSERT INTO mesas (capacidad, ubicacion, estado)
+            VALUES (?, ?, ?)
+        """, (
+            data['capacidad'], 
+            data['ubicacion'], 
+            data['estado'] 
+        ))
+        
+        connection.commit()
+        cursor.close()
+        connection.close()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Mesa agregada correctamente"
+        })
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+# TODO: implementar logica de editar mesas para usar este metodo
+@app.route('/api/mesas/<int:id>', methods=['GET'])
+def get_mesa(id):
+    try:
+        connection = db_manager.get_connection()
+        connection.row_factory = sqlite3.Row
+        cursor = connection.cursor()
+        
+        cursor.execute("SELECT * FROM mesas WHERE id = ?", (id,))
+        mesa = cursor.fetchone()
+        
+        if mesa:
+            mesa_dict = dict(mesa)
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "status": "success",
+                "mesa": mesa_dict
+            })
+        else:
+            cursor.close()
+            connection.close()
+            return jsonify({
+                "status": "error",
+                "message": "Mesa no encontrada"
+            }), 404
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@app.route('/api/mesas/update/<int:id>', methods=['PUT'])
+def update_mesa(id):
+    try:
+        data = request.json  # Datos enviados desde JS
+        connection = db_manager.get_connection()
+        cursor = connection.cursor()
+
+        # Ejecutar la actualización
+        cursor.execute("""
+            UPDATE mesas
+            SET capacidad = ?, ubicacion = ?, estado = ?
+            WHERE id = ?
+        """, (data['capacidad'], data['ubicacion'], data['estado'], id))
+
+        connection.commit()
+
+        # Verificar si realmente se modificó algo
+        if cursor.rowcount == 0:
+            return jsonify({"status": "error", "message": "Mesa no encontrada"}), 404
+
+        cursor.close()
+        connection.close()
+
+        return jsonify({"status": "success", "message": "Mesa actualizada correctamente ✅"})
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 @app.route('/api/menu/<int:id>', methods=['GET'])
 def get_menu_item(id):
     try:
@@ -340,7 +426,7 @@ def get_menu_item(id):
             }), 404
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
-
+    
 @app.route('/api/menu/update', methods=['POST'])
 def update_menu_item():
     try:

@@ -212,7 +212,37 @@ class DatabaseManager:
         except sqlite3.Error as e:
             print(f"Error obteniendo estadísticas del menú: {e}")
             return None
+        
+    def get_mesa_stats(self):
+        """Obtener estadísticas de las mesas"""
+        try:
+            connection = self.get_connection()
+            connection.row_factory = sqlite3.Row
+            cursor = connection.cursor()
+        
+            # Total de mesas
+            cursor.execute("SELECT COUNT(*) as total FROM mesas")
+            total = cursor.fetchone()["total"]
 
+            # Lista de mesas
+            cursor.execute("""
+                SELECT id, capacidad, ubicacion, estado
+                FROM mesas
+                ORDER BY id
+            """)
+            mesas = [dict(row) for row in cursor.fetchall()]
+
+            cursor.close()
+            connection.close()
+
+            return {
+                "total": total,
+                "lista": mesas
+            }
+        except sqlite3.Error as e:
+            print(f"Error obteniendo estadísticas de las mesas: {e}")
+            return None
+    
     def validar_usuario(self, correo, contrasena):
         try:
             connection = self.get_connection()
