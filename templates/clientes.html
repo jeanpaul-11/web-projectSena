@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='assets/imgs/faviconImagen.jpg') }}">
     <!-- font icons -->
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
     <!-- Bootstrap + Pigga main styles -->
@@ -508,14 +509,6 @@
 
         // Función para cargar los datos del usuario desde el backend
         function cargarDatosUsuario() {
-            // Obtener el ID del usuario de la sesión (esto debe estar disponible después del login)
-            const userId = localStorage.getItem('user_id');
-            if (!userId) {
-                alert('Por favor inicie sesión nuevamente');
-                window.location.href = '/login';
-                return;
-            }
-
             fetch('/api/usuario/datos', {
                 method: 'GET',
                 credentials: 'include'

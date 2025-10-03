@@ -340,7 +340,7 @@ class DatabaseManager:
                     num_documento, celular, correo, contrasena, 
                     intentos_fallidos, estado
                 ) VALUES (
-                    'cliente', ?, ?, ?, ?, ?, ?, ?, 0, 'activa'
+                    '0', ?, ?, ?, ?, ?, ?, ?, 0, 'activa'
                 )
             """
             values = (nombres, apellidos, tipo_documento, num_documento, celular, email, password)

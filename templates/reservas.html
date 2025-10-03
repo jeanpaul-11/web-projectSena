@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Reserva tu mesa en JP restaurant">
     <meta name="author" content="Devcrud">
+    <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='assets/imgs/faviconImagen.jpg') }}">
     <title>Reservas - JP restaurant</title>
     <!-- font icons -->
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
@@ -49,7 +50,24 @@
                             <input type="tel" class="form-control" name="phone" placeholder="Tu teléfono" required>
                         </div>
                         <div class="form-group">
-                            <input type="date" class="form-control" name="fecha" required>
+                            <input type="date" class="form-control" name="fecha" id="fecha" required>
+                            <script>
+                                // Establecer la fecha mínima como hoy
+                                const fechaInput = document.getElementById('fecha');
+                                const hoy = new Date();
+                                const yyyy = hoy.getFullYear();
+                                const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+                                const dd = String(hoy.getDate()).padStart(2, '0');
+                                const fechaMinima = `${yyyy}-${mm}-${dd}`;
+                                fechaInput.min = fechaMinima;
+
+                                // Si hay una fecha anterior a hoy seleccionada, la resetea
+                                fechaInput.addEventListener('input', function() {
+                                    if (this.value < fechaMinima) {
+                                        this.value = fechaMinima;
+                                    }
+                                });
+                            </script>
                         </div>
                         <div class="form-group">
                             <select class="form-control" name="hora" required>
@@ -65,22 +83,23 @@
                                 <option value="11:00">11:00 AM</option>
                                 <option value="11:30">11:30 AM</option>
                                 <option value="12:00">12:00 PM</option>
-                                <option value="12:00">13:00 PM</option>
-                                <option value="12:00">13:30 PM</option>
-                                <option value="12:00">14:00 PM</option>
-                                <option value="12:00">14:30 PM</option>
-                                <option value="12:00">15:00 PM</option>
-                                <option value="12:00">15:30 PM</option>
-                                <option value="12:00">16:00 PM</option>
-                                <option value="12:00">16:30 PM</option>
-                                <option value="12:00">17:00 PM</option>
-                                <option value="12:00">17:30 PM</option>
-                                <option value="12:00">18:00 PM</option>
-                                <option value="12:00">18:30 PM</option>
-                                <option value="12:00">19:00 PM</option>
-                                <option value="12:00">19:30 PM</option>
-                                <option value="12:00">20:00 PM</option>
-                                <option value="12:00">20:30 PM</option>
+                                <option value="12:00">12:30 PM</option>
+                                <option value="12:00">1:00 PM</option>
+                                <option value="12:00">1:30 PM</option>
+                                <option value="12:00">2:00 PM</option>
+                                <option value="12:00">2:30 PM</option>
+                                <option value="12:00">3:00 PM</option>
+                                <option value="12:00">3:30 PM</option>
+                                <option value="12:00">4:00 PM</option>
+                                <option value="12:00">4:30 PM</option>
+                                <option value="12:00">5:00 PM</option>
+                                <option value="12:00">5:30 PM</option>
+                                <option value="12:00">6:00 PM</option>
+                                <option value="12:00">6:30 PM</option>
+                                <option value="12:00">7:00 PM</option>
+                                <option value="12:00">7:30 PM</option>
+                                <option value="12:00">8:00 PM</option>
+                                <option value="12:00">8:30 PM</option>
                             </select>
                         </div>
                         <style>
@@ -107,61 +126,7 @@
                         </div>
                         
                         <div class="form-group">
-                            <button type="button" class="btn btn-info btn-block mb-3" onclick="togglePlatosSection()">¿Deseas agregar platos a tu reserva?</button>
-                        </div>
-
-                        <!-- Sección de platos -->
-                        <div id="platosSection">
-                            <h4 class="mb-3">Selecciona tus platos:</h4>
-                            <div class="platos-lista">
-                                <div class="plato-item mb-3 border-bottom pb-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h5>Hamburguesa de Angus</h5>
-                                            <p class="mb-1">Hamburguesa con carne angus 100 gr, pan brioche, mix de quesos cremosos</p>
-                                            <p class="text-primary">COP 25.000</p>
-                                        </div>
-                                        <div>
-                                            <input type="number" min="0" value="0" class="form-control plato-cantidad" 
-                                                   data-id="1"
-                                                   data-nombre="Hamburguesa de Angus" 
-                                                   data-precio="25000">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="plato-item mb-3 border-bottom pb-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h5>Pizza con champiñones</h5>
-                                            <p class="mb-1">Con champiñones, incluye únicamente queso y la salsa de tomate</p>
-                                            <p class="text-primary">COP 15.000</p>
-                                        </div>
-                                        <div>
-                                            <input type="number" min="0" value="0" class="form-control plato-cantidad" 
-                                                   data-id="2"
-                                                   data-nombre="Pizza con champiñones" 
-                                                   data-precio="15000">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="plato-item mb-3 border-bottom pb-3">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <h5>La Glotona</h5>
-                                            <p class="mb-1">Hamburguesa con triple carne artesanal, pan brioche, triple queso cheddar</p>
-                                            <p class="text-primary">COP 30.000</p>
-                                        </div>
-                                        <div>
-                                            <input type="number" min="0" value="0" class="form-control plato-cantidad" 
-                                                   data-id="3"
-                                                   data-nombre="La Glotona" 
-                                                   data-precio="30000">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <button type="button" class="btn btn-info btn-block mb-3" onclick="mostrarModalPlatos()">¿Deseas agregar platos a tu reserva?</button>
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-block">Reservar una mesa</button>
@@ -245,22 +210,199 @@
     <!-- Pigga js -->
     <script src="{{ url_for('static', filename='assets/js/pigga.js')}}"></script>
 
+    <!-- Categorías js -->
+    <script src="{{ url_for('static', filename='assets/js/categorias.js')}}"></script>
+
+    <!-- Modal de Selección de Platos -->
+    <div id="modalPlatos" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Selecciona tus platos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <style>
+                        .nav-categoria {
+                            margin-bottom: 20px;
+                            border-bottom: 1px solid #dee2e6;
+                        }
+                        .nav-categoria .nav-link {
+                            color: #495057;
+                            border: none;
+                            border-bottom: 2px solid transparent;
+                            padding: 10px 20px;
+                            font-weight: 500;
+                            background: none;
+                            transition: all 0.3s ease;
+                        }
+                        .nav-categoria .nav-link:hover {
+                            color: #007bff;
+                        }
+                        .nav-categoria .nav-link.active {
+                            color: #007bff;
+                            border-bottom: 2px solid #007bff;
+                        }
+                        .categoria-content {
+                            display: none;
+                        }
+                        .categoria-content.active {
+                            display: block;
+                        }
+                        .plato-item {
+                            padding: 15px;
+                            border-bottom: 1px solid rgba(0,0,0,0.1);
+                            margin-bottom: 15px;
+                        }
+                        .plato-item:last-child {
+                            border-bottom: none;
+                            margin-bottom: 0;
+                        }
+                        .plato-imagen {
+                            width: 120px;
+                            min-width: 120px;
+                            height: 120px;
+                            object-fit: cover;
+                            border-radius: 8px;
+                            margin-right: 20px;
+                        }
+                        .plato-info {
+                            flex-grow: 1;
+                            padding-right: 15px;
+                        }
+                        .plato-info h5 {
+                            margin-bottom: 10px;
+                            color: #333;
+                            font-weight: 600;
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                        }
+                        .tipo-badge {
+                            font-size: 0.7em;
+                            padding: 3px 8px;
+                            border-radius: 12px;
+                            font-weight: 500;
+                            text-transform: capitalize;
+                            background-color: #e9ecef;
+                            color: #495057;
+                        }
+                        .tipo-entrada {
+                            background-color: #e3f2fd;
+                            color: #1976d2;
+                        }
+                        .tipo-plato_fuerte {
+                            background-color: #fbe9e7;
+                            color: #d84315;
+                        }
+                        .tipo-postre {
+                            background-color: #f3e5f5;
+                            color: #7b1fa2;
+                        }
+                        .tipo-bebida {
+                            background-color: #e8f5e9;
+                            color: #2e7d32;
+                        }
+                        .plato-info .descripcion {
+                            color: #666;
+                            margin-bottom: 10px;
+                            font-size: 0.9rem;
+                        }
+                        .plato-info .precio {
+                            font-weight: bold;
+                            font-size: 1.1rem;
+                            margin-bottom: 0;
+                        }
+                        .plato-cantidad {
+                            width: 80px;
+                            text-align: center;
+                        }
+                    </style>
+                    <ul class="nav nav-categoria" id="categoriasTabs">
+                        <li class="nav-item">
+                            <button class="nav-link active" data-categoria="entrada">Entradas</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-categoria="plato_fuerte">Platos Fuertes</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-categoria="postre">Postres</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" data-categoria="bebida">Bebidas</button>
+                        </li>
+                    </ul>
+
+                    <div id="platosContainer">
+                        {% for categoria in ['entrada', 'plato_fuerte', 'postre', 'bebida'] %}
+                        <div class="categoria-content {% if categoria == 'entrada' %}active{% endif %}" data-categoria="{{ categoria }}">
+                            <div class="platos-lista">
+                                {% for plato in platos %}
+                                    {% if plato.tipo_alimento == categoria %}
+                                    <div class="plato-item">
+                                        <div class="d-flex align-items-start">
+                                            {% if plato.url_imagen %}
+                                            <img src="{{ url_for('static', filename=plato.url_imagen) }}" 
+                                                 alt="{{ plato.nombre }}" 
+                                                 class="plato-imagen">
+                                            {% endif %}
+                                            <div class="plato-info">
+                                                <h5>
+                                                    {{ plato.nombre }}
+                                                    <span class="tipo-badge tipo-{{ plato.tipo_alimento }}">
+                                                        {% if plato.tipo_alimento == 'plato_fuerte' %}
+                                                            Plato fuerte
+                                                        {% else %}
+                                                            {{ plato.tipo_alimento }}
+                                                        {% endif %}
+                                                    </span>
+                                                </h5>
+                                                <p class="descripcion">{{ plato.descripcion }}</p>
+                                                <p class="precio text-primary">COP {{ "{:,.0f}".format(plato.precio) }}</p>
+                                            </div>
+                                            <div>
+                                                <input type="number" min="0" value="0" 
+                                                       class="form-control plato-cantidad" 
+                                                       data-id="{{ plato.id }}"
+                                                       data-nombre="{{ plato.nombre }}" 
+                                                       data-precio="{{ plato.precio }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="continuarReserva()">Continuar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        function togglePlatosSection() {
-            const platosSection = document.getElementById('platosSection');
-            const isExpanding = !platosSection.classList.contains('show');
+        function mostrarModalPlatos() {
+            $('#modalPlatos').modal('show');
+        }
+
+        function continuarReserva() {
+            const formData = new FormData(document.getElementById('reservaForm'));
+            const platosSeleccionados = obtenerPlatosSeleccionados();
             
-            platosSection.classList.toggle('show');
-            
-            if (isExpanding) {
-                platosSection.style.display = 'block';
-                setTimeout(() => {
-                    window.scrollTo({
-                        top: platosSection.offsetTop - 100,
-                        behavior: 'smooth'
-                    });
-                }, 300);
+            if (platosSeleccionados.length === 0) {
+                if (!confirm('¿Deseas continuar sin agregar platos a tu reserva?')) {
+                    return;
+                }
             }
+            
+            $('#modalPlatos').modal('hide');
+            mostrarModal(formData);
         }
 
         function obtenerPlatosSeleccionados() {
@@ -321,8 +463,7 @@
 
         document.getElementById('reservaForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const formData = new FormData(this);
-            mostrarModal(formData);
+            mostrarModalPlatos();
         });
 
         document.getElementById('reservaExitosaModal').addEventListener('hidden.bs.modal', function () {
@@ -359,7 +500,6 @@
 
                     const modal = new bootstrap.Modal(document.getElementById('reservaExitosaModal'));
                     modal.show();
-                    //TODO: arreglar esto...... no se muestra el modal
 
                     document.getElementById('btnAceptar').onclick = window.location.href = "{{ url_for('clientes') }}";;
                     // Cuando haga clic en el overlay (fuera del modal)

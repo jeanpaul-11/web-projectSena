@@ -5,6 +5,15 @@ import random
 import string
 import sqlite3
 from flask_cors import CORS
+from functools import wraps
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 app = Flask(__name__)
 app.secret_key = '123'  # Añade una clave secreta segura en producción
@@ -29,6 +38,7 @@ def registrarse():
     return render_template('registrarse.html', title='Sing up')
 
 @app.route('/clientes')
+@login_required
 def clientes():
     return render_template('clientes.html', title='Clientes')
 
@@ -50,8 +60,15 @@ def admin():
     return render_template('admin.html', title='Panel de Administrador', usuarios=usuarios, reservas=reservas, menu=menu, mesas=mesas)
 
 @app.route('/reservas')
+@login_required
 def reservas():
-    return render_template('reservas.html', title='Reservas')
+    connection = db_manager.get_connection()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM alimentos WHERE estado = 'disponible'")
+    platos = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return render_template('reservas.html', title='Reservas', platos=platos)
 
 @app.route('/api/sendCredentialsAccess', methods=['POST'])
 def api_endpoint():
@@ -160,6 +177,36 @@ def crear_reserva():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/usuario/datos', methods=['GET'])
+def obtener_usuario_actual():
+    if 'user_id' not in session:
+        return jsonify({"status": "error", "message": "No hay sesión activa"}), 401
+        
+    try:
+        connection = db_manager.get_connection()
+        cursor = connection.cursor()
+        query = "SELECT nombres, apellidos, correo, celular FROM usuarios WHERE id = ?"
+        cursor.execute(query, (session['user_id'],))
+        usuario = cursor.fetchone()
+        cursor.close()
+        connection.close()
+
+        if usuario:
+            return jsonify({
+                "status": "success",
+                "data": {
+                    "nombres": usuario['nombres'],
+                    "apellidos": usuario['apellidos'],
+                    "email": usuario['correo'],
+                    "celular": usuario['celular']
+                }
+            })
+        else:
+            return jsonify({"status": "error", "message": "Usuario no encontrado"}), 404
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/usuario/<int:user_id>', methods=['GET'])
 def obtener_usuario(user_id):

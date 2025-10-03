@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="Start your development with Pigga landing page.">
     <meta name="author" content="Devcrud">
+    <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='assets/imgs/faviconImagen.jpg') }}">
     <title>JP restaurant</title>
     <!-- font icons -->
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
@@ -361,14 +362,41 @@
     <!-- End of Page Footer -->
 
     <!-- core  -->
-    <script src="assets/vendors/jquery/jquery-3.4.1.js"></script>
-    <script src="assets/vendors/bootstrap/bootstrap.bundle.js"></script>
+    <script src="{{ url_for('static', filename='assets/vendors/jquery/jquery-3.4.1.js') }}"></script>
+    <script src="{{ url_for('static', filename='assets/vendors/bootstrap/bootstrap.bundle.js') }}"></script>
 
     <!-- bootstrap affix -->
-    <script src="assets/vendors/bootstrap/bootstrap.affix.js"></script>
+    <script src="{{ url_for('static', filename='assets/vendors/bootstrap/bootstrap.affix.js') }}"></script>
 
     <!-- Pigga js -->
-    <script src="assets/js/pigga.js"></script>
+    <script src="{{ url_for('static', filename='assets/js/pigga.js') }}"></script>
+
+    <!-- Smooth Scroll -->
+    <script>
+        $(document).ready(function(){
+            // Manejo del scroll suave para todos los enlaces que apuntan a un ID
+            $('a[href^="#"]').on('click', function(event) {
+                event.preventDefault();
+                
+                var target = $(this.getAttribute('href'));
+                
+                if(target.length) {
+                    $('html, body').animate({
+                        scrollTop: target.offset().top - 70 // 70px de offset para compensar la navbar
+                    }, {
+                        duration: 1000, // duración de la animación en milisegundos
+                        easing: 'easeInOutQuad' // tipo de animación suave
+                    });
+                }
+            });
+
+            // Función de easing personalizada para un scroll más natural
+            jQuery.easing.easeInOutQuad = function(x, t, b, c, d) {
+                if ((t/=d/2) < 1) return c/2*t*t + b;
+                return -c/2 * ((--t)*(t-2) - 1) + b;
+            };
+        });
+    </script>
 
 </body>
 </html>
