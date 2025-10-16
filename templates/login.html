@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='assets/imgs/faviconImagen.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/stylesLogin.css') }}">
+    <title>Registro</title>
+    <style>
+        * {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        input, textarea, select {
+            -webkit-user-select: text !important;
+            -moz-user-select: text !important;
+            -ms-user-select: text !important;
+            user-select: text !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="container">
+        <div class="form-container sign-in-container">
+            <form action="#" id="loginForm">
+                <h1>Ingresa</h1>
+                <input type="email" id="email" color="white" placeholder="Correo electrónico" />
+                <input type="password" id="clave" color="white" placeholder="Clave" />
+                <a href="{{ url_for('olvidar_contrasena')}} ">Olvidaste tu contraseña?</a>
+                <button type="button" onclick="sendCredentialsAccess()">Ingresar</button>
+                <!-- Botón móvil que solo aparece cuando el overlay está oculto -->
+                <div class="mobile-signup">
+                    <p>¿No tienes una cuenta?</p>
+                    <button type="button" class="ghost mobile-only" onclick="irARegistro()">Registrarme</button>
+                </div>
+            </form>
+
+            <!-- Formulario de cambio de contraseña (inicialmente oculto) -->
+            <form action="#" id="changePasswordForm" style="display: none;">
+                <h2>Cambiar Contraseña Temporal</h2>
+                <input type="password" id="currentPassword" placeholder="Contraseña temporal (token)" />
+                <input type="password" id="newPassword" placeholder="Nueva contraseña" />
+                <input type="password" id="confirmPassword" placeholder="Confirmar nueva contraseña" />
+                <div class="button-group">
+                    <button type="button" onclick="updatePassword()">Actualizar Contraseña</button>
+                    <button type="button" class="ghost" onclick="skipPasswordChange()">Mantener Contraseña Temporal</button>
+                </div>
+            </form>
+        </div>
+        <div class="overlay-container">
+            <div class="overlay">
+                <div class="overlay-panel overlay-right">
+                    <h1>Hola!</h1>
+                    <p style="text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);">Ingresa tus datos para crear tu cuenta</p>
+                    <button class="ghost" id="signUp">Registrarme</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    async function sendCredentialsAccess() {
+        const url = '/api/sendCredentialsAccess';
+        const correo = document.getElementById('email').value;
+        const clave = document.getElementById('clave').value;
+        const data = {
+            correo: correo,
+            clave: clave
+        };
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(data)
+            });
+            const result = await response.json();
+            
+            if (result.status === "success") {
+                if (result.data.token_recuperacion) {
+                    // Si hay un token de recuperación, mostrar el formulario de cambio de contraseña
+                    document.getElementById('loginForm').style.display = 'none';
+                    document.getElementById('changePasswordForm').style.display = 'block';
+                } else {
+                    // Redireccionar según el tipo de usuario
+                    if (result.data.tipo_usuario === "0") {
+                        window.location.href = '/clientes';
+                    } else if (result.data.tipo_usuario === "1") {
+                        window.location.href = '/empleado';
+                    } else if (result.data.tipo_usuario === "2") {
+                        window.location.href = '/admin';
+                    }
+                }
+            } else {
+                alert(result.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al iniciar sesión');
+        }
+    }
+
+    function irARegistro() {
+        window.location.href = "{{ url_for('registrarse') }}";
+    }
+
+    document.getElementById('signUp').addEventListener('click', function() {
+        irARegistro();
+    });
+
+    async function updatePassword() {
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const email = document.getElementById('email').value;
+
+        if (newPassword !== confirmPassword) {
+            alert('Las contraseñas nuevas no coinciden');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/actualizar-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email: email,
+                    current_password: currentPassword,
+                    new_password: newPassword
+                })
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert('Contraseña actualizada exitosamente');
+                window.location.reload();
+            } else {
+                alert(result.message || 'Error al actualizar la contraseña');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al actualizar la contraseña');
+        }
+    }
+
+    function skipPasswordChange() {
+        const userType = "{{ session.get('user_type', '0') }}";
+        if (userType === "0") {
+            window.location.href = '/clientes';
+        } else if (userType === "1") {
+            window.location.href = '/empleado';
+        } else if (userType === "2") {
+            window.location.href = '/admin';
+        }
+    }
+</script>
+</html>

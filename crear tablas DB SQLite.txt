@@ -1,0 +1,61 @@
+CREATE TABLE mesas(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    capacidad INTEGER,
+    ubicacion TEXT,
+    estado TEXT CHECK (estado IN ('disponible', 'ocupada', 'reservada'))
+);
+CREATE TABLE usuarios(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo_usuario TEXT,
+    nombres TEXT NOT NULL,
+    apellidos TEXT,
+    tipo_documento TEXT NOT NULL,
+    num_documento TEXT NOT NULL,
+    celular TEXT,
+    correo TEXT NOT NULL,
+    contrasena TEXT NOT NULL,
+    intentos_fallidos INTEGER,
+    token_recuperacion TEXT,
+    estado TEXT,
+    fecha_creacion_perfil TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ultimo_login TIMESTAMP
+);
+
+
+CREATE TABLE reservas(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cliente_id INTEGER NOT NULL,
+    mesa_id INTEGER NOT NULL,
+    fecha DATE NOT NULL,
+    hora TIME NOT NULL,
+    num_personas INTEGER,
+    estado TEXT CHECK (estado IN ('activa', 'cancelada', 'completada')),
+    fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES usuarios(id),
+    FOREIGN KEY (mesa_id) REFERENCES mesas(id)
+);
+
+CREATE TABLE alimentos(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    tipo_alimento TEXT,
+    nombre TEXT,
+    gramaje INTEGER,
+    precio INTEGER
+);
+CREATE TABLE pedidos (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reserva_id INTEGER NOT NULL,
+    alimento_id INTEGER NOT NULL,
+    cantidad INTEGER NOT NULL,
+    FOREIGN KEY (reserva_id) REFERENCES reservas(id),
+    FOREIGN KEY (alimento_id) REFERENCES alimentos(id)
+);
+
+CREATE TABLE comprobantes(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reserva_id INTEGER NOT NULL,
+    subtotal INTEGER,
+    total INTEGER,
+    fecha_emision TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (reserva_id) REFERENCES reservas(id)
+);
