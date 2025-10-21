@@ -1,12 +1,23 @@
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import os
+from dotenv import load_dotenv
+
+# Cargar variables de entorno
+load_dotenv()
 
 class DatabaseManager:
     def __init__(self):
-        self.db_path = 'restaurant_jp_db.sqlite'
+        self.db_config = {
+            'dbname': os.getenv('DB_NAME', 'restaurant_jp_db'),
+            'user': os.getenv('DB_USER', 'postgres'),
+            'password': os.getenv('DB_PASSWORD', ''),
+            'host': os.getenv('DB_HOST', 'localhost'),
+            'port': os.getenv('DB_PORT', '5432')
+        }
 
     def get_connection(self):
-        connection = sqlite3.connect(self.db_path)
-        connection.row_factory = sqlite3.Row
+        connection = psycopg2.connect(**self.db_config, cursor_factory=RealDictCursor)
         return connection
 
     def get_user_stats(self):
@@ -33,7 +44,7 @@ class DatabaseManager:
                 FROM usuarios
                 ORDER BY id DESC
             """)
-            usuarios = [dict(row) for row in cursor.fetchall()]
+            usuarios = cursor.fetchall()
             
             cursor.close()
             connection.close()
@@ -44,7 +55,7 @@ class DatabaseManager:
                 "bloqueados": bloqueados,
                 "lista": usuarios
             }
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error obteniendo estadísticas de usuarios: {e}")
             return None
 
@@ -74,7 +85,7 @@ class DatabaseManager:
                 JOIN usuarios u ON r.cliente_id = u.id
                 ORDER BY r.fecha DESC, r.hora DESC
             """)
-            reservas = [dict(row) for row in cursor.fetchall()]
+            reservas = cursor.fetchall()
             
             cursor.close()
             connection.close()
@@ -85,7 +96,7 @@ class DatabaseManager:
                 "canceladas": canceladas,
                 "lista": reservas
             }
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error obteniendo estadísticas de reservas: {e}")
             return None
 
@@ -110,15 +121,15 @@ class DatabaseManager:
                     c.subtotal,
                     c.total,
                     c.fecha_emision,
-                    GROUP_CONCAT(a.nombre || ' (x' || p.cantidad || ' = $' || (a.precio * p.cantidad) || ')') as productos,
-                    GROUP_CONCAT(a.nombre || ' x' || p.cantidad) as nombre_producto
+                    string_agg(a.nombre || ' (x' || p.cantidad || ' = $' || (a.precio * p.cantidad) || ')', ', ') as productos,
+                    string_agg(a.nombre || ' x' || p.cantidad, ', ') as nombre_producto
                 FROM reservas r
                 JOIN usuarios u ON r.cliente_id = u.id
                 JOIN mesas m ON r.mesa_id = m.id
                 JOIN comprobantes c ON r.id = c.reserva_id
                 LEFT JOIN pedidos p ON r.id = p.reserva_id
                 LEFT JOIN alimentos a ON p.alimento_id = a.id
-                WHERE r.id = ?
+                WHERE r.id = %s
                 GROUP BY r.id
             """, (reserva_id,))
             
@@ -136,7 +147,7 @@ class DatabaseManager:
             connection.close()
             return comprobante
             
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error obteniendo comprobante: {e}")
             return None
 
@@ -147,7 +158,7 @@ class DatabaseManager:
             cursor = connection.cursor()
             
             # Verificar si ya existe un comprobante para esta reserva
-            cursor.execute("SELECT id FROM comprobantes WHERE reserva_id = ?", (reserva_id,))
+            cursor.execute("SELECT id FROM comprobantes WHERE reserva_id = %s", (reserva_id,))
             if cursor.fetchone():
                 cursor.close()
                 connection.close()
@@ -156,10 +167,10 @@ class DatabaseManager:
             # Obtener información de los pedidos y calcular el total
             cursor.execute("""
                 SELECT SUM(a.precio * p.cantidad) as subtotal, 
-                       GROUP_CONCAT(a.nombre || ' x' || p.cantidad) as nombre_producto
+                       string_agg(a.nombre || ' x' || p.cantidad, ', ') as nombre_producto
                 FROM pedidos p
                 JOIN alimentos a ON p.alimento_id = a.id
-                WHERE p.reserva_id = ?
+                WHERE p.reserva_id = %s
                 GROUP BY p.reserva_id
             """, (reserva_id,))
             
@@ -178,7 +189,7 @@ class DatabaseManager:
             cursor.execute("""
                 INSERT INTO comprobantes (
                     reserva_id, subtotal, total
-                ) VALUES (?, ?, ?)
+                ) VALUES (%s, %s, %s)
             """, (reserva_id, subtotal, total))
             
             connection.commit()
@@ -186,7 +197,7 @@ class DatabaseManager:
             connection.close()
             return True, "Comprobante creado exitosamente"
             
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error creando comprobante: {e}")
             return False, f"Error al crear el comprobante: {str(e)}"
 
@@ -224,7 +235,7 @@ class DatabaseManager:
                 "tipos": tipos,
                 "lista": platos
             }
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error obteniendo estadísticas del menú: {e}")
             return None
         
@@ -232,7 +243,7 @@ class DatabaseManager:
         """Obtener estadísticas de las mesas"""
         try:
             connection = self.get_connection()
-            connection.row_factory = sqlite3.Row
+            # PostgreSQL with RealDictCursor already handles row as dict
             cursor = connection.cursor()
         
             # Total de mesas
@@ -254,7 +265,7 @@ class DatabaseManager:
                 "total": total,
                 "lista": mesas
             }
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error obteniendo estadísticas de las mesas: {e}")
             return None
     
@@ -264,7 +275,7 @@ class DatabaseManager:
             cursor = connection.cursor()
             
             # Primero verificar si el usuario existe y su estado
-            check_query = "SELECT * FROM usuarios WHERE correo = ?"
+            check_query = "SELECT * FROM usuarios WHERE correo = %s"
             cursor.execute(check_query, (correo,))
             usuario = cursor.fetchone()
             
@@ -293,7 +304,7 @@ class DatabaseManager:
                     UPDATE usuarios 
                     SET intentos_fallidos = 0,
                         ultimo_login = CURRENT_TIMESTAMP 
-                    WHERE correo = ?
+                    WHERE correo = %s
                 """, (correo,))
                 connection.commit()
                 
@@ -318,7 +329,7 @@ class DatabaseManager:
                     UPDATE usuarios 
                     SET intentos_fallidos = ?, 
                         estado = ? 
-                    WHERE correo = ?
+                    WHERE correo = %s
                 """, (intentos, nuevo_estado, correo))
                 connection.commit()
                 
@@ -327,7 +338,7 @@ class DatabaseManager:
                 cursor.close()
                 connection.close()
                 return {"status": "error", "message": mensaje}
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             return {"status": "error", "message": f"Error validando usuario: {e}"}
         
     def insertar_usuario(self, nombres, apellidos, tipo_documento, num_documento, celular, email, password):
@@ -336,14 +347,14 @@ class DatabaseManager:
             cursor = connection.cursor()
             
             # Verificar si el correo ya está registrado
-            cursor.execute("SELECT id FROM usuarios WHERE correo = ?", (email,))
+            cursor.execute("SELECT id FROM usuarios WHERE correo = %s", (email,))
             if cursor.fetchone():
                 cursor.close()
                 connection.close()
                 return {"status": "error", "message": "El correo ya está registrado"}
             
             # Verificar si el número de documento ya está registrado
-            cursor.execute("SELECT id FROM usuarios WHERE num_documento = ?", (num_documento,))
+            cursor.execute("SELECT id FROM usuarios WHERE num_documento = %s", (num_documento,))
             if cursor.fetchone():
                 cursor.close()
                 connection.close()
@@ -355,7 +366,7 @@ class DatabaseManager:
                     num_documento, celular, correo, contrasena, 
                     intentos_fallidos, estado
                 ) VALUES (
-                    '0', ?, ?, ?, ?, ?, ?, ?, 0, 'activa'
+                    '0', %s, %s, %s, %s, %s, %s, %s, 0, 'activa'
                 )
             """
             values = (nombres, apellidos, tipo_documento, num_documento, celular, email, password)
@@ -364,7 +375,7 @@ class DatabaseManager:
             cursor.close()
             connection.close()
             return {"status": "success", "message": "Usuario registrado correctamente"}
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             return {"status": "error", "message": f"Error insertando usuario: {e}"}
 
 
@@ -376,7 +387,7 @@ class DatabaseManager:
             cursor.execute(insert_query, values)
             self.connection.commit() 
             print("mesa insertada correctamente")
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error insertando mesa: {e}")
             
     def insertar_pedidos(self, plato_id, cantidad, precio_unitario):
@@ -387,7 +398,7 @@ class DatabaseManager:
             cursor.execute(insert_query, values)
             self.connection.commit()
             print("pedido insertado correctamente")
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error insertando pedido: {e}")
 
     def insertar_reserva(self, fecha, hora, num_personas):
@@ -398,7 +409,7 @@ class DatabaseManager:
             cursor.execute(insert_query, values)
             self.connection.commit()
             print("reserva insertado correctamente")
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error insertando reserva: {e}")
 
     def crear_reserva(self, cliente_id, fecha, hora, num_personas, alimentos=None):
@@ -412,9 +423,9 @@ class DatabaseManager:
             # Buscar una mesa adecuada que no esté reservada para esa fecha y hora
             cursor.execute("""
                 SELECT m.id FROM mesas m 
-                WHERE m.capacidad >= ? AND m.id NOT IN (
+                WHERE m.capacidad >= %s AND m.id NOT IN (
                     SELECT mesa_id FROM reservas 
-                    WHERE fecha = ? AND hora = ? AND estado = 'activa'
+                    WHERE fecha = %s AND hora = %s AND estado = 'activa'
                 )
                 LIMIT 1
             """, (num_personas, fecha, hora))
@@ -428,7 +439,7 @@ class DatabaseManager:
             mesa_id = mesa['id']
             
             # Obtener información del cliente
-            cursor.execute("SELECT nombres, apellidos, correo FROM usuarios WHERE id = ?", (cliente_id,))
+            cursor.execute("SELECT nombres, apellidos, correo FROM usuarios WHERE id = %s", (cliente_id,))
             cliente = cursor.fetchone()
             if not cliente:
                 cursor.close()
@@ -438,10 +449,12 @@ class DatabaseManager:
             # Crear la reserva
             cursor.execute("""
                 INSERT INTO reservas (cliente_id, mesa_id, fecha, hora, num_personas, estado)
-                VALUES (?, ?, ?, ?, ?, 'activa')
+                VALUES (%s, %s, %s, %s, %s, 'activa')
             """, (cliente_id, mesa_id, fecha, hora, num_personas))
             
-            reserva_id = cursor.lastrowid
+            # Get the id of the inserted reservation
+            cursor.execute("SELECT LASTVAL()")
+            reserva_id = cursor.fetchone()['lastval']
             
             # Lista para almacenar detalles de platos para el correo
             platos_email = []
@@ -451,11 +464,11 @@ class DatabaseManager:
                 for alimento in alimentos:
                     cursor.execute("""
                         INSERT INTO pedidos (reserva_id, alimento_id, cantidad)
-                        VALUES (?, ?, ?)
+                        VALUES (%s, %s, %s)
                     """, (reserva_id, alimento['id'], alimento['cantidad']))
                     
                     # Obtener información del plato para el correo
-                    cursor.execute("SELECT nombre, precio FROM alimentos WHERE id = ?", (alimento['id'],))
+                    cursor.execute("SELECT nombre, precio FROM alimentos WHERE id = %s", (alimento['id'],))
                     plato_info = cursor.fetchone()
                     if plato_info:
                         platos_email.append({
@@ -466,7 +479,7 @@ class DatabaseManager:
             
             # Actualizar estado de la mesa
             cursor.execute("""
-                UPDATE mesas SET estado = 'reservada' WHERE id = ?
+                UPDATE mesas SET estado = 'reservada' WHERE id = %s
             """, (mesa_id,))
             
             connection.commit()
@@ -486,6 +499,6 @@ class DatabaseManager:
             connection.close()
             return True, "Reserva creada exitosamente"
             
-        except sqlite3.Error as e:
+        except psycopg2.Error as e:
             print(f"Error al crear reserva: {str(e)}")
             return False, "Error al procesar la reserva"
