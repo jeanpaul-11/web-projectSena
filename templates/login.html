@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='assets/imgs/faviconImagen.jpg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/stylesLogin.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications.css') }}">
     <title>Registro</title>
     <style>
         * {
@@ -25,6 +27,28 @@
     <div class="container" id="container">
         <div class="form-container sign-in-container">
             <form action="#" id="loginForm">
+                <style>
+                    @media (max-width: 600px) {
+                        /* espacio interior en el formulario de inicio de sesión */
+                        #loginForm {
+                            padding: 20px;
+                            box-sizing: border-box;
+                        }
+                        /* separar el contenido del panel overlay (botón Registrarme) en móviles */
+                        .overlay-panel {
+                            padding: 20px;
+                            box-sizing: border-box;
+                        }
+                        /* evitar que botones y textos queden pegados */
+                        .overlay-panel h1,
+                        #loginForm h1,
+                        .ghost,
+                        .mobile-signup {
+                            margin-top: 8px;
+                            margin-bottom: 8px;
+                        }
+                    }
+                </style>
                 <h1>Ingresa</h1>
                 <input type="email" id="email" color="white" placeholder="Correo electrónico" />
                 <input type="password" id="clave" color="white" placeholder="Clave" />
@@ -59,7 +83,10 @@
             </div>
         </div>
     </div>
+    <!-- Contenedor de notificaciones -->
+    <div id="notificacionContainer" class="notificacion-container"></div>
 </body>
+<script src="{{ url_for('static', filename='assets/js/notifications.js') }}"></script>
 <script>
     async function sendCredentialsAccess() {
         const url = '/api/sendCredentialsAccess';
@@ -97,11 +124,11 @@
                     }
                 }
             } else {
-                alert(result.message);
+                mostrarNotificacion(result.message, 'error');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al iniciar sesión');
+            mostrarNotificacion('Error al iniciar sesión', 'error');
         }
     }
 
@@ -120,7 +147,7 @@
         const email = document.getElementById('email').value;
 
         if (newPassword !== confirmPassword) {
-            alert('Las contraseñas nuevas no coinciden');
+            mostrarNotificacion('Las contraseñas nuevas no coinciden', 'error');
             return;
         }
 
@@ -140,14 +167,14 @@
 
             const result = await response.json();
             if (result.status === 'success') {
-                alert('Contraseña actualizada exitosamente');
-                window.location.reload();
+                mostrarNotificacion('Contraseña actualizada exitosamente', 'success');
+                setTimeout(() => window.location.reload(), 1500);
             } else {
-                alert(result.message || 'Error al actualizar la contraseña');
+                mostrarNotificacion(result.message || 'Error al actualizar la contraseña', 'error');
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('Error al actualizar la contraseña');
+            mostrarNotificacion('Error al actualizar la contraseña', 'error');
         }
     }
 

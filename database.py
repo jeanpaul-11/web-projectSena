@@ -18,6 +18,7 @@ class DatabaseManager:
 
     def get_connection(self):
         connection = psycopg2.connect(**self.db_config, cursor_factory=RealDictCursor)
+        connection.set_client_encoding('UTF8')
         return connection
 
     def get_user_stats(self):

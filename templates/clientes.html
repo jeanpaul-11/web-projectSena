@@ -24,6 +24,7 @@
     <!-- Second Navigation -->
     <nav class="nav-second navbar custom-navbar navbar-expand-sm navbar-dark bg-dark sticky-top">
         <div class="container">
+            <span class="navbar-text d-block d-sm-none text-white mr-3">Menú de Acciones</span>
             <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse"
                 data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -37,14 +38,14 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
+                    <li class="nav-item mb-2 mb-sm-0">
                         <form action="{{ url_for('reservas') }}" method="get" style="display: inline;">
                             <button type="submit" class="btn btn-primary btn-sm mr-2" style="background-color: #bc8c4c; border-color: #bc8c4c; transition: all 0.3s ease;">
                                 <i class="ti-calendar"></i> Reservar
                             </button>
                         </form>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item mb-2 mb-sm-0">
                         <button onclick="abrirModalPerfil()" class="btn btn-primary btn-sm mr-2" style="background-color: #bc8c4c; border-color: #bc8c4c; transition: all 0.3s ease;">
                             <i class="ti-user"></i> Editar perfil
                         </button>
@@ -64,8 +65,8 @@
     <header class="header">
         <div class="overlay">
             <img src="{{ url_for('static', filename='assets/imgs/logoShort.PNG')}}" class="cliente-logo">
-            <h1 class="subtitle">Bienvenido a tu panel de cliente</h1>
-            <h1 class="title">JP gourmet have restaurant</h1>
+            <h1 class="subtitle text-center">Bienvenido, cliente</h1>
+            <h1 class="title text-center">Explora nuestro menú y reserva tu mesa</h1>
         </div>
     </header>
     <!-- End Of Header -->
