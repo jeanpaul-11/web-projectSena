@@ -5,7 +5,14 @@ click==8.3.0
 itsdangerous==2.2.0
 MarkupSafe==3.0.2
 blinker==1.9.0
-python-dotenv==1.0.0    # Para variables de entorno
-flask-cors==4.0.0
+python-dotenv==1.0.0     # Para variables de entorno
+flask-cors==4.0.0        # Para CORS
 psycopg2-binary==2.9.11  # Driver de PostgreSQL
-gunicorn==20.1.0      # Servidor WSGI para producción
+gunicorn==23.0.0         # Servidor WSGI para producción
+Flask-Caching==2.3.1     # Para caché de respuestas
+orjson==3.11.3           # Para JSON rápido y optimizado
+email-validator==2.0.0   # Para validación de correos
+dnspython==2.8.0         # Dependencia para email-validator
+cachelib==0.13.0         # Backend para Flask-Caching
+typing-extensions==4.9.0  # Para anotaciones de tipo
+greenlet==3.0.3          # Dependencia para psycopg2
