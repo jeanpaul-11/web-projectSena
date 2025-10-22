@@ -1,7 +1,11 @@
 5432 puerto de postgresql
 123 contraseña postgresql
 
+hacer el cambio de sqlite a postgresql
 psql "postgresql://postgres:CoKvcoKCwDnwHkPhtseZHIxodwIxVClM@crossover.proxy.rlwy.net:25502/railway" -f "C:\Users\Jean Paul\Desktop\sena ADSO\sena ADSO\web-projectSena\backup.sql"
+
+conectarse a la base de datos en railway
+psql "postgresql://postgres:CoKvcoKCwDnwHkPhtseZHIxodwIxVClM@crossover.proxy.rlwy.net:25502/railway"
 
 Server Name:    	                Railway Database (o el nombre que quieras)
 Host name/address:              	crossover.proxy.rlwy.net
