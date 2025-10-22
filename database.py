@@ -275,8 +275,14 @@ class DatabaseManager:
             connection = self.get_connection()
             cursor = connection.cursor()
             
-            # Primero verificar si el usuario existe y su estado
-            check_query = "SELECT * FROM usuarios WHERE correo = %s"
+            # Optimizar la consulta para obtener solo los campos necesarios
+            check_query = """
+                SELECT id, tipo_usuario, nombres, contrasena, token_recuperacion, 
+                       estado, intentos_fallidos
+                FROM usuarios 
+                WHERE correo = %s
+                AND estado != 'eliminado'
+            """
             cursor.execute(check_query, (correo,))
             usuario = cursor.fetchone()
             
@@ -285,62 +291,83 @@ class DatabaseManager:
                 connection.close()
                 return {"status": "error", "message": "Usuario no encontrado"}
             
-            # Verificar si la cuenta está bloqueada
+            # Verificar bloqueo antes de cualquier otra validación
             if usuario['estado'] == 'bloqueado':
                 cursor.close()
                 connection.close()
                 return {"status": "error", "message": "Cuenta bloqueada. Contacte al administrador"}
             
-            # Si tiene token de recuperación, solo puede iniciar sesión con el token
+            # Validación de token de recuperación
             if usuario['token_recuperacion']:
-                if contrasena != usuario['token_recuperacion']:
+                if contrasena == usuario['token_recuperacion']:
+                    cursor.execute("""
+                        UPDATE usuarios 
+                        SET intentos_fallidos = 0,
+                            ultimo_login = CURRENT_TIMESTAMP
+                        WHERE id = %s
+                    """, (usuario['id'],))
+                    connection.commit()
+                    cursor.close()
+                    connection.close()
+                    return {
+                        "status": "success",
+                        "message": "Usuario validado correctamente",
+                        "data": {
+                            "tipo_usuario": usuario['tipo_usuario'],
+                            "id": usuario['id'],
+                            "nombres": usuario['nombres'],
+                            "token_recuperacion": usuario['token_recuperacion']
+                        }
+                    }
+                else:
                     cursor.close()
                     connection.close()
                     return {"status": "error", "message": "Debe usar el token enviado a su correo"}
-                    
-            # Verificar la contraseña
-            if contrasena == usuario['contrasena'] or (usuario['token_recuperacion'] and contrasena == usuario['token_recuperacion']):
-                # Actualizar último login y reiniciar intentos fallidos
+            
+            # Validación de contraseña normal
+            if contrasena == usuario['contrasena']:
                 cursor.execute("""
                     UPDATE usuarios 
                     SET intentos_fallidos = 0,
-                        ultimo_login = CURRENT_TIMESTAMP 
-                    WHERE correo = %s
-                """, (correo,))
+                        ultimo_login = CURRENT_TIMESTAMP
+                    WHERE id = %s
+                """, (usuario['id'],))
                 connection.commit()
-                
                 cursor.close()
                 connection.close()
                 return {
-                    "status": "success", 
+                    "status": "success",
                     "message": "Usuario validado correctamente",
                     "data": {
                         "tipo_usuario": usuario['tipo_usuario'],
                         "id": usuario['id'],
                         "nombres": usuario['nombres'],
-                        "token_recuperacion": usuario['token_recuperacion']
+                        "token_recuperacion": None
                     }
                 }
-            else:
-                # Incrementar intentos fallidos
-                intentos = usuario['intentos_fallidos'] + 1 if usuario['intentos_fallidos'] else 1
-                nuevo_estado = 'bloqueado' if intentos >= 3 else usuario['estado']
-                
-                cursor.execute("""
-                    UPDATE usuarios 
-                    SET intentos_fallidos = ?, 
-                        estado = ? 
-                    WHERE correo = %s
-                """, (intentos, nuevo_estado, correo))
-                connection.commit()
-                
-                mensaje = "Cuenta bloqueada por múltiples intentos fallidos" if intentos >= 3 else f"Contraseña incorrecta. Intentos restantes: {3 - intentos}"
-                
-                cursor.close()
-                connection.close()
-                return {"status": "error", "message": mensaje}
+            
+            # Manejo de intentos fallidos
+            intentos = (usuario['intentos_fallidos'] or 0) + 1
+            nuevo_estado = 'bloqueado' if intentos >= 3 else usuario['estado']
+            
+            cursor.execute("""
+                UPDATE usuarios 
+                SET intentos_fallidos = %s, 
+                    estado = %s 
+                WHERE id = %s
+            """, (intentos, nuevo_estado, usuario['id']))
+            connection.commit()
+            
+            mensaje = "Cuenta bloqueada por múltiples intentos fallidos" if intentos >= 3 else f"Contraseña incorrecta. Intentos restantes: {3 - intentos}"
+            
+            cursor.close()
+            connection.close()
+            return {"status": "error", "message": mensaje}
+            
         except psycopg2.Error as e:
-            return {"status": "error", "message": f"Error validando usuario: {e}"}
+            if connection:
+                connection.close()
+            return {"status": "error", "message": f"Error de conexión a la base de datos"}
         
     def insertar_usuario(self, nombres, apellidos, tipo_documento, num_documento, celular, email, password):
         try:

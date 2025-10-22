@@ -1,6 +1,4 @@
-// Función para mostrar notificaciones estilizadas
 function mostrarNotificacion(mensaje, tipo = 'info', duracion = 5000) {
-    // Asegurar que existe el contenedor de notificaciones
     let container = document.getElementById('notificacionContainer');
     if (!container) {
         container = document.createElement('div');
@@ -8,12 +6,9 @@ function mostrarNotificacion(mensaje, tipo = 'info', duracion = 5000) {
         container.className = 'notificacion-container';
         document.body.appendChild(container);
     }
-
-    // Crear la notificación
     const notificacion = document.createElement('div');
     notificacion.className = `notificacion ${tipo}`;
     
-    // Determinar el ícono según el tipo
     let icono = 'ti-info-alt';
     switch(tipo) {
         case 'success':

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, Response
 from database import DatabaseManager
 from email_service import EmailService
 import random
@@ -9,6 +9,26 @@ from flask_cors import CORS
 from functools import wraps
 from dotenv import load_dotenv
 import os
+import orjson
+from flask_caching import Cache
+import gzip
+from io import BytesIO
+from typing import Union, Dict, Any
+from flask import after_this_request
+import random
+import string
+import psycopg2
+from psycopg2.extras import RealDictCursor
+from flask_cors import CORS
+from functools import wraps
+from dotenv import load_dotenv
+import os
+import orjson
+from flask_caching import Cache
+import gzip
+from io import BytesIO
+from typing import Union, Dict, Any
+from flask import after_this_request
 
 # Cargar variables de entorno
 load_dotenv()
@@ -45,11 +65,55 @@ def role_required(allowed_roles):
         return decorated_function
     return decorator
 
+# Configuración de la aplicación Flask
 app = Flask(__name__)
 app.secret_key = '123'  # Añade una clave secreta segura en producción
 CORS(app, supports_credentials=True)
+
+# Configuración de caché
+cache_config = {
+    'CACHE_TYPE': 'simple',  # Para producción usar 'redis' o 'memcached'
+    'CACHE_DEFAULT_TIMEOUT': 300  # 5 minutos de caché por defecto
+}
+cache = Cache(app, config=cache_config)
+
+# Instancias de servicios
 db_manager = DatabaseManager()
 email_service = EmailService()
+
+# Funciones cacheadas para estadísticas
+@cache.memoize(timeout=300)  # Cache por 5 minutos
+def get_menu_stats():
+    return db_manager.get_menu_stats()
+
+@cache.memoize(timeout=300)
+def get_reservation_stats():
+    return db_manager.get_reservation_stats()
+
+@cache.memoize(timeout=300)
+def get_user_stats():
+    return db_manager.get_user_stats()
+
+@cache.memoize(timeout=300)
+def get_mesa_stats():
+    return db_manager.get_mesa_stats()
+
+# Función personalizada para serializar JSON usando orjson
+def custom_jsonify(data: Union[Dict, Any]) -> Response:
+    return Response(
+        orjson.dumps(data),
+        mimetype='application/json'
+    )
+
+# Función para comprimir respuesta con Gzip
+def gzip_response(data: Union[str, bytes]) -> tuple[bytes, dict]:
+    gzip_buffer = BytesIO()
+    with gzip.GzipFile(mode='wb', fileobj=gzip_buffer) as gz_file:
+        if isinstance(data, str):
+            gz_file.write(data.encode('utf-8'))
+        else:
+            gz_file.write(data)
+    return gzip_buffer.getvalue(), {'Content-Encoding': 'gzip'}
 
 @app.route('/')
 def index():
@@ -81,11 +145,22 @@ def clientes():
 @login_required
 @role_required(['empleado', 'admin'])  
 def empleado():
-    # Obtener estadísticas para el panel del empleado
-    reservas = db_manager.get_reservation_stats()
-    menu = db_manager.get_menu_stats()
-    mesas = db_manager.get_mesa_stats()
-    return render_template('empleado.html', title='Panel de Empleado', reservas=reservas, menu=menu, mesas=mesas)
+    # Usar funciones cacheadas
+    reservas = get_reservation_stats()
+    menu = get_menu_stats()
+    mesas = get_mesa_stats()
+    
+    response = render_template('empleado.html', 
+                             title='Panel de Empleado', 
+                             reservas=reservas, 
+                             menu=menu, 
+                             mesas=mesas)
+    
+    # Aplicar compresión Gzip si el navegador lo soporta
+    if 'gzip' in request.headers.get('Accept-Encoding', '').lower():
+        compressed_data, headers = gzip_response(response)
+        return Response(compressed_data, headers=headers, mimetype='text/html')
+    return response
 
 @app.route('/admin')
 @login_required
@@ -111,19 +186,40 @@ def reservas():
     return render_template('reservas.html', title='Reservas', platos=platos)
 
 @app.route('/api/sendCredentialsAccess', methods=['POST'])
+@cache.memoize(timeout=60)  # Cache por 1 minuto
 def api_endpoint():
     data = request.json
     correo = data.get('correo')
     clave = data.get('clave')
+    
+    if not correo or not clave:
+        return custom_jsonify({
+            "status": "error",
+            "message": "Correo y contraseña son requeridos"
+        }), 400
+
+    # Intentar obtener el resultado del caché primero
+    cache_key = f"login_attempts_{correo}"
+    attempts = cache.get(cache_key) or 0
+    
+    if attempts >= 3:
+        return custom_jsonify({
+            "status": "error",
+            "message": "Demasiados intentos. Por favor, espere un minuto."
+        }), 429
 
     resultado = db_manager.validar_usuario(correo, clave)
-    print(f"Correo: {correo}, Clave: {clave}")
     
-    if resultado["status"] == "success":
+    if resultado["status"] == "error":
+        # Incrementar el contador de intentos fallidos en caché
+        cache.set(cache_key, attempts + 1, timeout=60)
+    elif resultado["status"] == "success":
+        # Limpiar el caché de intentos y establecer la sesión
+        cache.delete(cache_key)
         session['user_id'] = resultado["data"]["id"]
         session['user_role'] = resultado["data"]["tipo_usuario"]
         
-    return jsonify(resultado)
+    return custom_jsonify(resultado)
 
 @app.route('/api/registro', methods=['POST'])
 def registro():
@@ -494,7 +590,7 @@ def actualizar_password():
 
     # Actualizar la contraseña, eliminar el token y restaurar el estado
     update_query = """UPDATE usuarios 
-                     SET contrasena = ?, 
+                     SET contrasena = %s, 
                          token_recuperacion = NULL, 
                          estado = 'activa',
                          intentos_fallidos = 0 
@@ -571,7 +667,7 @@ def update_reservation_status(reserva_id):
             cursor.execute("""
                 SELECT COUNT(*) as reservas_activas 
                 FROM reservas 
-                WHERE mesa_id = ? AND estado = 'activa' AND id != ?
+                WHERE mesa_id = %s AND estado = 'activa' AND id != %s
             """, (mesa_id, reserva_id))
             
             otras_reservas = cursor.fetchone()['reservas_activas']
@@ -622,12 +718,15 @@ def add_menu_item():
         cursor.close()
         connection.close()
         
-        return jsonify({
+        # Invalidar el caché relacionado con el menú
+        cache.delete_memoized(get_menu_stats)
+        
+        return custom_jsonify({
             "status": "success",
             "message": "Plato agregado correctamente"
         })
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return custom_jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/mesas/add', methods=['POST'])
 @login_required
@@ -803,8 +902,8 @@ def manage_menu_item(plato_id):
             data = request.json
             cursor.execute("""
                 UPDATE alimentos 
-                SET nombre = ?, descripcion = ?, tipo_alimento = ?, gramaje = ?, precio = ?, estado = ?, url_imagen = ?
-                WHERE id = ?
+                SET nombre = %s, descripcion = %s, tipo_alimento = %s, gramaje = %s, precio = %s, estado = %s, url_imagen = %s
+                WHERE id = %s
             """, (data['nombre'], data['descripcion'], data['tipo_alimento'], data['gramaje'], 
                   data['precio'], data['estado'], data.get('url_imagen'), plato_id))
             mensaje = "Plato actualizado correctamente"

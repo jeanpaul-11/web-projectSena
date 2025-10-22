@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
+<!DOCTYPE ang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,53 +7,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications.css') }}">
     <title>Registro</title>
-    <style>
-        * {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-        }
-        input, textarea, select {
-            -webkit-user-select: text !important;
-            -moz-user-select: text !important;
-            -ms-user-select: text !important;
-            user-select: text !important;
-        }
-    </style>
 </head>
 <body>
     <div class="container" id="container">
         <div class="form-container sign-in-container">
             <form action="#" id="loginForm">
-                <style>
-                    @media (max-width: 600px) {
-                        /* espacio interior en el formulario de inicio de sesión */
-                        #loginForm {
-                            padding: 20px;
-                            box-sizing: border-box;
-                        }
-                        /* separar el contenido del panel overlay (botón Registrarme) en móviles */
-                        .overlay-panel {
-                            padding: 20px;
-                            box-sizing: border-box;
-                        }
-                        /* evitar que botones y textos queden pegados */
-                        .overlay-panel h1,
-                        #loginForm h1,
-                        .ghost,
-                        .mobile-signup {
-                            margin-top: 8px;
-                            margin-bottom: 8px;
-                        }
-                    }
-                </style>
                 <h1>Ingresa</h1>
                 <input type="email" id="email" color="white" placeholder="Correo electrónico" />
                 <input type="password" id="clave" color="white" placeholder="Clave" />
                 <a href="{{ url_for('olvidar_contrasena')}} ">Olvidaste tu contraseña?</a>
-                <button type="button" onclick="sendCredentialsAccess()">Ingresar</button>
-                <!-- Botón móvil que solo aparece cuando el overlay está oculto -->
+                <button type="button" class="login-button" onclick="sendCredentialsAccess()">Ingresar</button>
                 <div class="mobile-signup">
                     <p>¿No tienes una cuenta?</p>
                     <button type="button" class="ghost mobile-only" onclick="irARegistro()">Registrarme</button>
@@ -77,14 +39,25 @@
             <div class="overlay">
                 <div class="overlay-panel overlay-right">
                     <h1>Hola!</h1>
-                    <p style="text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);">Ingresa tus datos para crear tu cuenta</p>
+                    <p>Ingresa tus datos para crear tu cuenta</p>
                     <button class="ghost" id="signUp">Registrarme</button>
                 </div>
             </div>
         </div>
     </div>
     <!-- Contenedor de notificaciones -->
-    <div id="notificacionContainer" class="notificacion-container"></div>
+        <div id="notificacionContainer" class="notificacion-container"></div>
+    
+    <!-- Spinner de carga para login -->
+    <div id="spinnerOverlay" class="login-spinner-overlay">
+        <div class="login-spinner"></div>
+    </div>
+</body>
+    
+    <!-- Spinner de carga -->
+    <div id="spinnerOverlay" class="spinner-overlay">
+        <div class="spinner"></div>
+    </div>
 </body>
 <script src="{{ url_for('static', filename='assets/js/notifications.js') }}"></script>
 <script>
@@ -92,20 +65,38 @@
         const url = '/api/sendCredentialsAccess';
         const correo = document.getElementById('email').value;
         const clave = document.getElementById('clave').value;
+        const loginButton = document.querySelector('button[onclick="sendCredentialsAccess()"]');
+        const spinnerOverlay = document.getElementById('spinnerOverlay');
+        
+        if (!correo || !clave) {
+            mostrarNotificacion('Por favor ingrese correo y contraseña', 'error');
+            return;
+        }
+        
+        // Desactivar el botón y mostrar spinner
+        loginButton.disabled = true;
+        spinnerOverlay.style.display = 'flex';
+        
         const data = {
             correo: correo,
             clave: clave
         };
 
         try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000); // Timeout después de 10 segundos
+            
             const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 credentials: 'include',
-                body: JSON.stringify(data)
+                body: JSON.stringify(data),
+                signal: controller.signal
             });
+            
+            clearTimeout(timeoutId);
             const result = await response.json();
             
             if (result.status === "success") {
@@ -128,7 +119,15 @@
             }
         } catch (error) {
             console.error('Error:', error);
-            mostrarNotificacion('Error al iniciar sesión', 'error');
+            if (error.name === 'AbortError') {
+                mostrarNotificacion('La conexión está tardando demasiado. Por favor, intente nuevamente.', 'error');
+            } else {
+                mostrarNotificacion('Error al iniciar sesión', 'error');
+            }
+        } finally {
+            // Restaurar el botón y ocultar spinner
+            loginButton.disabled = false;
+            spinnerOverlay.style.display = 'none';
         }
     }
 
