@@ -49,6 +49,7 @@ def clientes():
     return render_template('clientes.html', title='Clientes')
 
 @app.route('/empleado')
+@login_required
 def empleado():
     # Obtener estadísticas para el panel del empleado
     reservas = db_manager.get_reservation_stats()
@@ -57,6 +58,7 @@ def empleado():
     return render_template('empleado.html', title='Panel de Empleado', reservas=reservas, menu=menu, mesas=mesas)
 
 @app.route('/admin')
+@login_required
 def admin():
     # Obtener todas las estadísticas para el panel de administración
     usuarios = db_manager.get_user_stats()
