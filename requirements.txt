@@ -7,8 +7,7 @@ MarkupSafe==3.0.2
 blinker==1.9.0
 python-dotenv==1.0.0    # Para variables de entorno
 email-validator==2.0.0   # Para validación de emails
-flask-sqlalchemy==3.1.1  # ORM para SQLite
 flask-cors==4.0.0
-flask
+psycopg2-binary==2.9.11  # Driver de PostgreSQL
 gunicorn==20.1.0      # Servidor WSGI para producción
 pytest==7.4.0         # Para pruebas

@@ -1,0 +1,4 @@
+5432 puerto de postgresql
+123 contraseña postgresql
+
+psql "postgresql://postgres:CoKvcoKCwDnwHkPhtseZHIxodwIxVClM@crossover.proxy.rlwy.net:25502/railway" -f "C:\Users\Jean Paul\Desktop\sena ADSO\sena ADSO\web-projectSena\backup.sql"

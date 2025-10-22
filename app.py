@@ -3,9 +3,15 @@ from database import DatabaseManager
 from email_service import EmailService
 import random
 import string
-import sqlite3
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from flask_cors import CORS
 from functools import wraps
+from dotenv import load_dotenv
+import os
+
+# Cargar variables de entorno
+load_dotenv()
 
 def login_required(f):
     @wraps(f)
@@ -113,9 +119,8 @@ def recuperar_clave():
 
     # Verificar si el email existe en la base de datos
     connection = db_manager.get_connection()
-    connection.row_factory = sqlite3.Row
     cursor = connection.cursor()
-    query = "SELECT * FROM usuarios WHERE correo = ?"
+    query = "SELECT * FROM usuarios WHERE correo = %s"
     cursor.execute(query, (email,))
     usuario = cursor.fetchone()
 
@@ -131,7 +136,7 @@ def recuperar_clave():
     token = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
     # Guardar el token en la base de datos y usarlo como contraseña temporal
-    update_query = "UPDATE usuarios SET token_recuperacion = ?, contrasena = ?, estado = 'recuperacion', intentos_fallidos = 0 WHERE correo = ?"
+    update_query = "UPDATE usuarios SET token_recuperacion = %s, contrasena = %s, estado = 'recuperacion', intentos_fallidos = 0 WHERE correo = %s"
     cursor.execute(update_query, (token, token, email))
     connection.commit()
     cursor.close()
@@ -186,7 +191,7 @@ def obtener_usuario_actual():
     try:
         connection = db_manager.get_connection()
         cursor = connection.cursor()
-        query = "SELECT nombres, apellidos, correo, celular FROM usuarios WHERE id = ?"
+        query = "SELECT nombres, apellidos, correo, celular FROM usuarios WHERE id = %s"
         cursor.execute(query, (session['user_id'],))
         usuario = cursor.fetchone()
         cursor.close()
@@ -213,7 +218,7 @@ def obtener_usuario(user_id):
     try:
         connection = db_manager.get_connection()
         cursor = connection.cursor()
-        query = "SELECT nombres, apellidos, correo, celular FROM usuarios WHERE id = ?"
+        query = "SELECT nombres, apellidos, correo, celular FROM usuarios WHERE id = %s"
         cursor.execute(query, (user_id,))
         usuario = cursor.fetchone()
         cursor.close()
@@ -244,7 +249,7 @@ def obtener_detalles_usuario(user_id):
             SELECT id, nombres, apellidos, tipo_documento, num_documento, 
                    celular, correo, tipo_usuario
             FROM usuarios 
-            WHERE id = ?
+            WHERE id = %s
         """
         cursor.execute(query, (user_id,))
         usuario = cursor.fetchone()
@@ -270,7 +275,7 @@ def agregar_usuario():
         cursor = connection.cursor()
         
         # Verificar si el correo ya existe
-        cursor.execute("SELECT id FROM usuarios WHERE correo = ?", (data['email'],))
+        cursor.execute("SELECT id FROM usuarios WHERE correo = %s", (data['email'],))
         if cursor.fetchone():
             cursor.close()
             connection.close()
@@ -280,7 +285,7 @@ def agregar_usuario():
             }), 400
             
         # Verificar si el número de documento ya existe
-        cursor.execute("SELECT id FROM usuarios WHERE num_documento = ?", (data['num_documento'],))
+        cursor.execute("SELECT id FROM usuarios WHERE num_documento = %s", (data['num_documento'],))
         if cursor.fetchone():
             cursor.close()
             connection.close()
@@ -295,7 +300,7 @@ def agregar_usuario():
                 nombres, apellidos, tipo_documento, num_documento,
                 celular, correo, contrasena, tipo_usuario,
                 estado, intentos_fallidos
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'activa', 0)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, 'activa', 0)
         """, (
             data['nombres'], data['apellidos'], data['tipo_documento'],
             data['num_documento'], data['celular'], data['email'],
@@ -322,7 +327,7 @@ def actualizar_usuario(user_id):
         cursor = connection.cursor()
         
         # Verificar si el correo ya existe para otro usuario
-        cursor.execute("SELECT id FROM usuarios WHERE correo = ? AND id != ?", 
+        cursor.execute("SELECT id FROM usuarios WHERE correo = %s AND id != %s", 
                     (data['email'], user_id))
         if cursor.fetchone():
             cursor.close()
@@ -333,7 +338,7 @@ def actualizar_usuario(user_id):
             }), 400
             
         # Verificar si el número de documento ya existe para otro usuario
-        cursor.execute("SELECT id FROM usuarios WHERE num_documento = ? AND id != ?", 
+        cursor.execute("SELECT id FROM usuarios WHERE num_documento = %s AND id != %s", 
                     (data['num_documento'], user_id))
         if cursor.fetchone():
             cursor.close()
@@ -346,14 +351,14 @@ def actualizar_usuario(user_id):
         # Actualizar el usuario
         cursor.execute("""
             UPDATE usuarios 
-            SET nombres = ?, 
-                apellidos = ?,
-                tipo_documento = ?,
-                num_documento = ?,
-                celular = ?,
-                correo = ?,
-                tipo_usuario = ?
-            WHERE id = ?
+            SET nombres = %s, 
+                apellidos = %s,
+                tipo_documento = %s,
+                num_documento = %s,
+                celular = %s,
+                correo = %s,
+                tipo_usuario = %s
+            WHERE id = %s
         """, (
             data['nombres'], data['apellidos'], data['tipo_documento'],
             data['num_documento'], data['celular'], data['email'],
@@ -384,7 +389,7 @@ def actualizar_perfil_usuario():
 
         # Verificar si el correo ya existe para otro usuario
         if 'email' in data:
-            cursor.execute("SELECT id FROM usuarios WHERE correo = ? AND id != ?", 
+            cursor.execute("SELECT id FROM usuarios WHERE correo = %s AND id != %s", 
                         (data['email'], session['user_id']))
             if cursor.fetchone():
                 cursor.close()
@@ -397,11 +402,11 @@ def actualizar_perfil_usuario():
         # Actualizar los datos del usuario
         update_query = """
             UPDATE usuarios 
-            SET nombres = ?,
-                apellidos = ?,
-                correo = ?,
-                celular = ?
-            WHERE id = ?
+            SET nombres = %s,
+                apellidos = %s,
+                correo = %s,
+                celular = %s
+            WHERE id = %s
         """
         cursor.execute(update_query, (
             data['nombres'],
@@ -438,7 +443,7 @@ def actualizar_password():
     cursor = connection.cursor()
     
     # Verificar que el token coincida
-    query = "SELECT * FROM usuarios WHERE correo = ? AND token_recuperacion = ?"
+    query = "SELECT * FROM usuarios WHERE correo = %s AND token_recuperacion = %s"
     cursor.execute(query, (email, current_password))
     usuario = cursor.fetchone()
 
@@ -456,7 +461,7 @@ def actualizar_password():
                          token_recuperacion = NULL, 
                          estado = 'activa',
                          intentos_fallidos = 0 
-                     WHERE correo = ?"""
+                     WHERE correo = %s"""
     cursor.execute(update_query, (new_password, email))
     connection.commit()
     cursor.close()
@@ -474,7 +479,7 @@ def toggle_user_status(user_id):
         cursor = connection.cursor()
         
         # Obtener estado actual del usuario
-        cursor.execute("SELECT estado FROM usuarios WHERE id = ?", (user_id,))
+        cursor.execute("SELECT estado FROM usuarios WHERE id = %s", (user_id,))
         result = cursor.fetchone()
         
         if not result:
@@ -484,7 +489,7 @@ def toggle_user_status(user_id):
         
         # Cambiar el estado
         nuevo_estado = 'bloqueado' if result['estado'] == 'activa' else 'activa'
-        cursor.execute("UPDATE usuarios SET estado = ? WHERE id = ?", (nuevo_estado, user_id))
+        cursor.execute("UPDATE usuarios SET estado = %s WHERE id = %s", (nuevo_estado, user_id))
         
         connection.commit()
         cursor.close()
@@ -509,7 +514,7 @@ def update_reservation_status(reserva_id):
         cursor = connection.cursor()
         
         # Obtener el ID de la mesa antes de actualizar la reserva
-        cursor.execute("SELECT mesa_id FROM reservas WHERE id = ?", (reserva_id,))
+        cursor.execute("SELECT mesa_id FROM reservas WHERE id = %s", (reserva_id,))
         resultado = cursor.fetchone()
         if not resultado:
             cursor.close()
@@ -519,7 +524,7 @@ def update_reservation_status(reserva_id):
         mesa_id = resultado['mesa_id']
         
         # Actualizar el estado de la reserva
-        cursor.execute("UPDATE reservas SET estado = ? WHERE id = ?", (nuevo_estado, reserva_id))
+        cursor.execute("UPDATE reservas SET estado = %s WHERE id = %s", (nuevo_estado, reserva_id))
         
         # Actualizar el estado de la mesa según el nuevo estado de la reserva
         if nuevo_estado in ['completada', 'cancelada']:
@@ -534,7 +539,7 @@ def update_reservation_status(reserva_id):
             
             if otras_reservas == 0:
                 # Si no hay otras reservas activas, marcar la mesa como disponible
-                cursor.execute("UPDATE mesas SET estado = 'disponible' WHERE id = ?", (mesa_id,))
+                cursor.execute("UPDATE mesas SET estado = 'disponible' WHERE id = %s", (mesa_id,))
         
         connection.commit()
         
@@ -569,7 +574,7 @@ def add_menu_item():
         
         cursor.execute("""
             INSERT INTO alimentos (nombre, descripcion, tipo_alimento, gramaje, precio, estado, url_imagen)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """, (data['nombre'], data['descripcion'], data['tipo_alimento'], data['gramaje'], data['precio'], data['estado'], data.get('url_imagen')))
         
         connection.commit()
@@ -593,7 +598,7 @@ def add_mesa():
         print("Estado recibido:", repr(data.get("estado")))
         cursor.execute("""
             INSERT INTO mesas (capacidad, ubicacion, estado)
-            VALUES (?, ?, ?)
+            VALUES (%s, %s, %s)
         """, (
             data['capacidad'], 
             data['ubicacion'], 
@@ -616,10 +621,9 @@ def add_mesa():
 def get_mesa(id):
     try:
         connection = db_manager.get_connection()
-        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
         
-        cursor.execute("SELECT * FROM mesas WHERE id = ?", (id,))
+        cursor.execute("SELECT * FROM mesas WHERE id = %s", (id,))
         mesa = cursor.fetchone()
         
         if mesa:
@@ -650,8 +654,8 @@ def update_mesa(id):
         # Ejecutar la actualización
         cursor.execute("""
             UPDATE mesas
-            SET capacidad = ?, ubicacion = ?, estado = ?
-            WHERE id = ?
+            SET capacidad = %s, ubicacion = %s, estado = %s
+            WHERE id = %s
         """, (data['capacidad'], data['ubicacion'], data['estado'], id))
 
         connection.commit()
@@ -672,12 +676,10 @@ def update_mesa(id):
 def get_menu_item(id):
     try:
         connection = db_manager.get_connection()
-        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
-        
-        cursor.execute("SELECT * FROM alimentos WHERE id = ?", (id,))
-        plato = cursor.fetchone()
-        
+            
+        cursor.execute("SELECT * FROM alimentos WHERE id = %s", (id,))
+        plato = cursor.fetchone()        
         if plato:
             plato_dict = dict(plato)
             cursor.close()
@@ -705,8 +707,8 @@ def update_menu_item():
         
         cursor.execute("""
             UPDATE alimentos 
-            SET nombre = ?, descripcion = ?, tipo_alimento = ?, gramaje = ?, precio = ?, estado = ?, url_imagen = ?
-            WHERE id = ?
+            SET nombre = %s, descripcion = %s, tipo_alimento = %s, gramaje = %s, precio = %s, estado = %s, url_imagen = %s
+            WHERE id = %s
         """, (data['nombre'], data['descripcion'], data['tipo_alimento'], data['gramaje'], 
               data['precio'], data['estado'], data.get('url_imagen'), data['id']))
         
@@ -730,8 +732,8 @@ def update_reservation(reserva_id):
         
         cursor.execute("""
             UPDATE reservas 
-            SET mesa_id = ?, fecha = ?, hora = ?, num_personas = ?, estado = ?
-            WHERE id = ?
+            SET mesa_id = %s, fecha = %s, hora = %s, num_personas = %s, estado = %s
+            WHERE id = %s
         """, (data['mesa_id'], data['fecha'], data['hora'], data['num_personas'], data['estado'], reserva_id))
         
         connection.commit()
@@ -752,7 +754,7 @@ def manage_menu_item(plato_id):
         cursor = connection.cursor()
         
         if request.method == 'DELETE':
-            cursor.execute("DELETE FROM alimentos WHERE id = ?", (plato_id,))
+            cursor.execute("DELETE FROM alimentos WHERE id = %s", (plato_id,))
             mensaje = "Plato eliminado correctamente"
         else:  # PUT
             data = request.json
