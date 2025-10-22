@@ -73,13 +73,13 @@ def registrarse():
 
 @app.route('/clientes')
 @login_required
-@role_required(['cliente'])  # tipo_usuario = 0
+@role_required(['cliente', 'admin']) 
 def clientes():
     return render_template('clientes.html', title='Clientes')
 
 @app.route('/empleado')
 @login_required
-@role_required(['empleado'])  # tipo_usuario = 1
+@role_required(['empleado', 'admin'])  
 def empleado():
     # Obtener estadísticas para el panel del empleado
     reservas = db_manager.get_reservation_stats()
@@ -89,7 +89,7 @@ def empleado():
 
 @app.route('/admin')
 @login_required
-@role_required(['admin'])  # tipo_usuario = 2
+@role_required(['admin']) 
 def admin():
     # Obtener todas las estadísticas para el panel de administración
     usuarios = db_manager.get_user_stats()
