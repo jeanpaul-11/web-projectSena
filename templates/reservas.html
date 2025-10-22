@@ -301,8 +301,72 @@
                             color: #333;
                             font-weight: 600;
                             display: flex;
-                            align-items: center;
+                            align-items: flex-start;
                             gap: 10px;
+                            flex-wrap: wrap;
+                        }
+
+                        @media (max-width: 768px) {
+                            .modal-dialog {
+                                margin: 0.5rem;
+                            }
+                            .plato-item {
+                                padding: 10px;
+                            }
+                            .plato-imagen {
+                                width: 80px;
+                                min-width: 80px;
+                                height: 80px;
+                                margin-right: 10px;
+                            }
+                            .plato-info h5 {
+                                font-size: 1rem;
+                                margin-bottom: 5px;
+                            }
+                            .plato-info .descripcion {
+                                font-size: 0.85rem;
+                                margin-bottom: 5px;
+                            }
+                            .tipo-badge {
+                                font-size: 0.65em;
+                                padding: 2px 6px;
+                            }
+                            .plato-cantidad {
+                                width: 60px;
+                                height: 35px;
+                                padding: 2px;
+                            }
+                        }
+
+                        @media (max-width: 576px) {
+                            .nav-categoria {
+                                overflow-x: auto;
+                                flex-wrap: nowrap;
+                                padding-bottom: 5px;
+                            }
+                            .nav-categoria .nav-link {
+                                padding: 8px 12px;
+                                font-size: 0.9rem;
+                                white-space: nowrap;
+                            }
+                            .plato-item {
+                                margin-bottom: 10px;
+                            }
+                            .d-flex.align-items-start {
+                                flex-wrap: wrap;
+                            }
+                            .plato-info {
+                                width: calc(100% - 90px);
+                                padding-right: 0;
+                                margin-bottom: 10px;
+                            }
+                            .plato-cantidad {
+                                width: 100%;
+                                margin-top: 10px;
+                            }
+                            .modal-content {
+                                border-radius: 0;
+                            }
                         }
                         .tipo-badge {
                             font-size: 0.7em;
@@ -413,7 +477,46 @@
     <script>
         function mostrarModalPlatos() {
             $('#modalPlatos').modal('show');
+            // Ajustar el scroll horizontal de las categorías al abrir el modal
+            setTimeout(() => {
+                const categoriasTabs = document.getElementById('categoriasTabs');
+                if (categoriasTabs) {
+                    categoriasTabs.scrollLeft = 0;
+                }
+            }, 300);
         }
+
+        // Manejar el desplazamiento suave de las categorías en móvil
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoriasTabs = document.getElementById('categoriasTabs');
+            let isScrolling = false;
+            let startX;
+            let scrollLeft;
+
+            if (categoriasTabs) {
+                categoriasTabs.addEventListener('mousedown', (e) => {
+                    isScrolling = true;
+                    startX = e.pageX - categoriasTabs.offsetLeft;
+                    scrollLeft = categoriasTabs.scrollLeft;
+                });
+
+                categoriasTabs.addEventListener('mouseleave', () => {
+                    isScrolling = false;
+                });
+
+                categoriasTabs.addEventListener('mouseup', () => {
+                    isScrolling = false;
+                });
+
+                categoriasTabs.addEventListener('mousemove', (e) => {
+                    if (!isScrolling) return;
+                    e.preventDefault();
+                    const x = e.pageX - categoriasTabs.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    categoriasTabs.scrollLeft = scrollLeft - walk;
+                });
+            }
+        });
 
         function continuarReserva() {
             const formData = new FormData(document.getElementById('reservaForm'));

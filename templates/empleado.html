@@ -9,6 +9,79 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/pigga.css')}}">
     <style>
+        /* Estilos para las notificaciones */
+        .notificacion-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+        }
+
+        .notificacion {
+            background: #333;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            min-width: 300px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .notificacion.success {
+            background: #28a745;
+            border-left: 4px solid #1e7e34;
+        }
+
+        .notificacion.error {
+            background: #dc3545;
+            border-left: 4px solid #bd2130;
+        }
+
+        .notificacion .mensaje {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notificacion .mensaje i {
+            font-size: 18px;
+        }
+
+        .notificacion .cerrar {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 5px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
         body {
             margin: 0;
             padding: 0;
@@ -57,7 +130,6 @@
         }
 
         .table-responsive {
-            overflow-x: auto;
             width: 100%;
             margin-bottom: 1rem;
         }
@@ -77,7 +149,6 @@
             color: white;
             padding: 15px;
             text-align: left;
-            white-space: nowrap;
         }
 
         .admin-table td {
@@ -87,6 +158,52 @@
             color: #ffffff;
         }
 
+        @media (max-width: 768px) {
+            .admin-table {
+                display: block;
+            }
+            
+            .admin-table thead {
+                display: none;
+            }
+            
+            .admin-table tbody {
+                display: block;
+            }
+            
+            .admin-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                padding: 1rem;
+            }
+            
+            .admin-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+                border: none;
+            }
+            
+            .admin-table td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                margin-right: 1rem;
+            }
+
+            .admin-table td:last-child {
+                border-bottom: none;
+            }
+
+            .btn-group {
+                flex-direction: row;
+                justify-content: flex-end;
+                gap: 0.5rem;
+            }
+        }
+
         .admin-table tr:hover {
             background: #333333;
         }
@@ -94,7 +211,6 @@
         .admin-table tr:last-child td {
             border-bottom: none;
         }
-
 
         /* Ajustes específicos para la columna de acciones */
         .admin-table th:last-child,
@@ -115,7 +231,6 @@
             font-size: 0.875rem;
             white-space: nowrap;
             flex: 0 0 auto;
-
         }
 
         .status-badge {
@@ -357,15 +472,15 @@
                     <tbody>
                         {% for reserva in reservas.lista %}
                         <tr>
-                            <td>{{ reserva.id }}</td>
-                            <td>{{ reserva.cliente }}</td>
-                            <td>{{ reserva.mesa_id }}</td>
-                            <td>{{ reserva.fecha }}</td>
-                            <td>{{ reserva.hora }}</td>
-                            <td>{{ reserva.num_personas }}</td>
-                            <td><span class="status-badge status-{{ reserva.estado }}">{{ reserva.estado|title }}</span>
+                            <td data-label="ID">{{ reserva.id }}</td>
+                            <td data-label="Cliente">{{ reserva.cliente }}</td>
+                            <td data-label="Mesa">{{ reserva.mesa_id }}</td>
+                            <td data-label="Fecha">{{ reserva.fecha }}</td>
+                            <td data-label="Hora">{{ reserva.hora }}</td>
+                            <td data-label="Personas">{{ reserva.num_personas }}</td>
+                            <td data-label="Estado"><span class="status-badge status-{{ reserva.estado }}">{{ reserva.estado|title }}</span>
                             </td>
-                            <td>
+                            <td data-label="Acciones">
                                 <div class="btn-group">
                                     {% if reserva.estado == 'activa' %}
                                     <button class="btn btn-info btn-sm"
@@ -406,11 +521,11 @@
                     <tbody>
                         {% for plato in menu.lista %}
                         <tr>
-                            <td>{{ plato.id }}</td>
-                            <td>{{ plato.nombre }}</td>
-                            <td>{{ plato.gramaje }}g</td>
-                            <td>${{ "{:,.0f}".format(plato.precio) }}</td>
-                            <td>{{ plato.tipo_alimento }}</td>
+                            <td data-label="ID">{{ plato.id }}</td>
+                            <td data-label="Nombre">{{ plato.nombre }}</td>
+                            <td data-label="Gramaje">{{ plato.gramaje }}g</td>
+                            <td data-label="Precio">${{ "{:,.0f}".format(plato.precio) }}</td>
+                            <td data-label="Tipo">{{ plato.tipo_alimento }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -487,10 +602,10 @@
                     <tbody>
                         {% for mesa in mesas.lista %}
                         <tr>
-                            <td>{{ mesa.id }}</td>
-                            <td>{{ mesa.capacidad }}</td>
-                            <td>{{ mesa.ubicacion }}</td>
-                            <td>{{ mesa.estado }}</td>
+                            <td data-label="ID">{{ mesa.id }}</td>
+                            <td data-label="Capacidad">{{ mesa.capacidad }}</td>
+                            <td data-label="Ubicación">{{ mesa.ubicacion }}</td>
+                            <td data-label="Estado">{{ mesa.estado }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -561,11 +676,45 @@
             </form>
         </div>
     </div>
+
+    <!-- Contenedor de notificaciones -->
+    <div id="notificacionContainer" class="notificacion-container"></div>
+
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='assets/vendors/jquery/jquery-3.4.1.js') }}"></script>
     <script src="{{ url_for('static', filename='assets/vendors/bootstrap/bootstrap.bundle.js') }}"></script>
     <script>
-          async function guardarNuevaMesa(event) {
+        // Función para mostrar notificaciones estilizadas
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const container = document.getElementById('notificacionContainer');
+            const notificacion = document.createElement('div');
+            notificacion.className = `notificacion ${tipo}`;
+            
+            // Agregar ícono según el tipo
+            const icono = tipo === 'success' ? 'ti-check' : 'ti-alert';
+            
+            notificacion.innerHTML = `
+                <div class="mensaje">
+                    <i class="${icono}"></i>
+                    ${mensaje}
+                </div>
+                <button class="cerrar" onclick="this.parentElement.remove()">&times;</button>
+            `;
+            
+            container.appendChild(notificacion);
+            
+            // Animar salida después de 5 segundos
+            setTimeout(() => {
+                notificacion.style.animation = 'fadeOut 0.5s ease-out forwards';
+                setTimeout(() => {
+                    if (notificacion.parentElement) {
+                        notificacion.remove();
+                    }
+                }, 500);
+            }, 5000);
+        }
+
+        async function guardarNuevaMesa(event) {
             event.preventDefault();
 
             const data = {
@@ -584,17 +733,18 @@
                 const result = await response.json();
 
                 if (result.status === "success") {
-                    alert("Mesa agregada correctamente ✅");
+                    mostrarNotificacion("Mesa agregada correctamente ✅");
                     cerrarModalMesa();
-                    location.reload(); // recargar para ver la nueva mesa en la tabla
+                    location.reload();
                 } else {
-                    alert("Error: " + result.message);
+                    mostrarNotificacion(result.message, "error");
                 }
             } catch (err) {
                 console.error("Error al guardar mesa:", err);
-                alert("Error al conectar con el servidor.");
+                mostrarNotificacion("Error al conectar con el servidor", "error");
             }
         }
+
         function abrirModalNuevaMesa() {
             document.getElementById('modalNuevaMesa').style.display = 'block';
         }
@@ -602,6 +752,7 @@
         function cerrarModalMesa() {
             document.getElementById('modalNuevaMesa').style.display = 'none';
         }
+
         function cerrarModalEditarMesa() {
             document.getElementById('modalEditarMesa').style.display = 'none';
         }
@@ -648,15 +799,15 @@
                 const result = await response.json();
 
                 if (result.status === "success") {
-                    alert("Mesa actualizada correctamente ✅");
+                    mostrarNotificacion("Mesa actualizada correctamente ✅");
                     cerrarModalEditarMesa();
                     location.reload();
                 } else {
-                    alert("Error: " + result.message);
+                    mostrarNotificacion(result.message, "error");
                 }
             } catch (err) {
                 console.error("Error al guardar cambios de mesa:", err);
-                alert("Error al conectar con el servidor.");
+                mostrarNotificacion("Error al conectar con el servidor", "error");
             }
             return false;
         }

@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpg" href="{{ url_for('static', filename='assets/imgs/faviconImagen.jpg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/vendors/themify-icons/css/themify-icons.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/notifications.css') }}">
     <title>Recuperar Contraseña</title>
     <style>
         * {
@@ -115,11 +117,14 @@
             <button type="submit">Restablecer Contraseña</button>
         </form>
     </div>
+    <!-- Contenedor de notificaciones -->
+    <div id="notificacionContainer" class="notificacion-container"></div>
+
+    <script src="{{ url_for('static', filename='assets/js/notifications.js') }}"></script>
     <script>
         async function enviarSolicitud(event) {
             event.preventDefault();
             const email = document.getElementById('email').value;
-            const mensajeDiv = document.getElementById('mensaje');
 
             try {
                 const response = await fetch('/recuperar-clave', {
@@ -131,22 +136,17 @@
                 });
 
                 const data = await response.json();
-                mensajeDiv.style.display = 'block';
                 
                 if (data.status === 'success') {
-                    mensajeDiv.className = 'mensaje mensaje-exito';
-                    mensajeDiv.textContent = 'Se ha enviado un correo con las instrucciones para restablecer tu contraseña';
+                    mostrarNotificacion('Se ha enviado un correo con las instrucciones para restablecer tu contraseña', 'success');
                     setTimeout(() => {
                         window.location.href = "{{ url_for('login') }}";
                     }, 3000);
                 } else {
-                    mensajeDiv.className = 'mensaje mensaje-error';
-                    mensajeDiv.textContent = data.message || 'Error al procesar la solicitud';
+                    mostrarNotificacion(data.message || 'Error al procesar la solicitud', 'error');
                 }
             } catch (error) {
-                mensajeDiv.className = 'mensaje mensaje-error';
-                mensajeDiv.textContent = 'Error al conectar con el servidor';
-                mensajeDiv.style.display = 'block';
+                mostrarNotificacion('Error al conectar con el servidor', 'error');
             }
         }
     </script>

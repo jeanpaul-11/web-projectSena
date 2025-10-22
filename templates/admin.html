@@ -145,7 +145,6 @@
         }
 
         .table-responsive {
-            overflow-x: auto;
             width: 100%;
             margin-bottom: 1rem;
         }
@@ -165,7 +164,6 @@
             color: white;
             padding: 15px;
             text-align: left;
-            white-space: nowrap;
         }
 
         .admin-table td {
@@ -173,6 +171,52 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             vertical-align: middle;
             color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .admin-table {
+                display: block;
+            }
+            
+            .admin-table thead {
+                display: none; /* Ocultar encabezados en móvil */
+            }
+            
+            .admin-table tbody {
+                display: block;
+            }
+            
+            .admin-table tr {
+                display: block;
+                margin-bottom: 1rem;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px;
+                padding: 1rem;
+            }
+            
+            .admin-table td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5rem 0;
+                border: none;
+            }
+            
+            .admin-table td:before {
+                content: attr(data-label);
+                font-weight: bold;
+                margin-right: 1rem;
+            }
+
+            .admin-table td:last-child {
+                border-bottom: none;
+            }
+
+            .btn-group {
+                flex-direction: row;
+                justify-content: flex-end;
+                gap: 0.5rem;
+            }
         }
 
         .admin-table tr:hover {
@@ -466,14 +510,14 @@
                     <tbody>
                         {% for usuario in usuarios.lista %}
                         <tr>
-                            <td>{{ usuario.id }}</td>
-                            <td>{{ usuario.nombre }}</td>
-                            <td>{{ usuario.correo }}</td>
-                            <td><span
+                            <td data-label="ID">{{ usuario.id }}</td>
+                            <td data-label="Nombre">{{ usuario.nombre }}</td>
+                            <td data-label="Email">{{ usuario.correo }}</td>
+                            <td data-label="Estado"><span
                                     class="status-badge status-{% if usuario.estado == 'activa' %}active{% else %}blocked{% endif %}">{{
                                     usuario.estado|title }}</span></td>
-                            <td>{{ usuario.tipo_usuario|title }}</td>
-                            <td>
+                            <td data-label="Tipo">{{ usuario.tipo_usuario|title }}</td>
+                            <td data-label="Acciones">
                                 <div class="btn-group">
                                     {% if usuario.estado == 'activa' %}
                                     <button class="btn btn-warning btn-sm"
@@ -529,15 +573,15 @@
                     <tbody>
                         {% for reserva in reservas.lista %}
                         <tr>
-                            <td>{{ reserva.id }}</td>
-                            <td>{{ reserva.cliente }}</td>
-                            <td>{{ reserva.mesa_id }}</td>
-                            <td>{{ reserva.fecha }}</td>
-                            <td>{{ reserva.hora }}</td>
-                            <td>{{ reserva.num_personas }}</td>
-                            <td><span class="status-badge status-{{ reserva.estado }}">{{ reserva.estado|title }}</span>
+                            <td data-label="ID">{{ reserva.id }}</td>
+                            <td data-label="Cliente">{{ reserva.cliente }}</td>
+                            <td data-label="Mesa">{{ reserva.mesa_id }}</td>
+                            <td data-label="Fecha">{{ reserva.fecha }}</td>
+                            <td data-label="Hora">{{ reserva.hora }}</td>
+                            <td data-label="Personas">{{ reserva.num_personas }}</td>
+                            <td data-label="Estado"><span class="status-badge status-{{ reserva.estado }}">{{ reserva.estado|title }}</span>
                             </td>
-                            <td>
+                            <td data-label="Acciones">
                                 <div class="btn-group">
                                     {% if reserva.estado == 'activa' %}
                                     <button class="btn btn-success btn-sm"
@@ -578,12 +622,12 @@
                     <tbody>
                         {% for plato in menu.lista %}
                         <tr>
-                            <td>{{ plato.id }}</td>
-                            <td>{{ plato.nombre }}</td>
-                            <td>{{ plato.gramaje }}g</td>
-                            <td>${{ "{:,.0f}".format(plato.precio) }}</td>
-                            <td>{{ plato.tipo_alimento }}</td>
-                            <td>
+                            <td data-label="ID">{{ plato.id }}</td>
+                            <td data-label="Nombre">{{ plato.nombre }}</td>
+                            <td data-label="Gramaje">{{ plato.gramaje }}g</td>
+                            <td data-label="Precio">${{ "{:,.0f}".format(plato.precio) }}</td>
+                            <td data-label="Tipo">{{ plato.tipo_alimento }}</td>
+                            <td data-label="Acciones">
                                 <div class="btn-group">
                                     <button class="btn btn-info btn-sm"
                                         onclick="editarPlato('{{ plato.id }}')">Editar</button>
@@ -725,11 +769,11 @@
                     <tbody>
                         {% for mesa in mesas.lista %}
                         <tr>
-                            <td>{{ mesa.id }}</td>
-                            <td>{{ mesa.capacidad }}</td>
-                            <td>{{ mesa.ubicacion }}</td>
-                            <td>{{ mesa.estado }}</td>
-                            <td>
+                            <td data-label="ID">{{ mesa.id }}</td>
+                            <td data-label="Capacidad">{{ mesa.capacidad }}</td>
+                            <td data-label="Ubicación">{{ mesa.ubicacion }}</td>
+                            <td data-label="Estado">{{ mesa.estado }}</td>
+                            <td data-label="Acciones">
                                 <div class="btn-group">
                                     <button class="btn btn-info btn-sm"
                                         onclick="editarMesa('{{ mesa.id }}')">Editar</button>

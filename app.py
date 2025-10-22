@@ -21,6 +21,30 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def role_required(allowed_roles):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'user_id' not in session or 'user_role' not in session:
+                return redirect(url_for('login'))
+            
+            # Convertir el rol de usuario a número
+            user_role = int(session.get('user_role', -1))
+            
+            # Convertir roles permitidos a números
+            role_map = {'cliente': 0, 'empleado': 1, 'admin': 2}
+            numeric_roles = [role_map.get(role, -1) for role in allowed_roles]
+            
+            if user_role not in numeric_roles:
+                return jsonify({
+                    'status': 'error',
+                    'message': 'No tienes permisos para acceder a esta pagina'
+                }), 403
+            
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
+
 app = Flask(__name__)
 app.secret_key = '123'  # Añade una clave secreta segura en producción
 CORS(app, supports_credentials=True)
@@ -29,6 +53,10 @@ email_service = EmailService()
 
 @app.route('/')
 def index():
+    return render_template('index.html', title='Index')
+
+@app.route('/index')
+def index2():
     return render_template('index.html', title='Index')
 
 @app.route('/login')
@@ -45,10 +73,13 @@ def registrarse():
 
 @app.route('/clientes')
 @login_required
+@role_required(['cliente', 'admin']) 
 def clientes():
     return render_template('clientes.html', title='Clientes')
 
 @app.route('/empleado')
+@login_required
+@role_required(['empleado', 'admin'])  
 def empleado():
     # Obtener estadísticas para el panel del empleado
     reservas = db_manager.get_reservation_stats()
@@ -57,6 +88,8 @@ def empleado():
     return render_template('empleado.html', title='Panel de Empleado', reservas=reservas, menu=menu, mesas=mesas)
 
 @app.route('/admin')
+@login_required
+@role_required(['admin']) 
 def admin():
     # Obtener todas las estadísticas para el panel de administración
     usuarios = db_manager.get_user_stats()
@@ -67,6 +100,7 @@ def admin():
 
 @app.route('/reservas')
 @login_required
+@role_required(['cliente', 'admin'])  # Solo clientes (0) y administradores (2) pueden hacer reservas
 def reservas():
     connection = db_manager.get_connection()
     cursor = connection.cursor()
@@ -87,6 +121,7 @@ def api_endpoint():
     
     if resultado["status"] == "success":
         session['user_id'] = resultado["data"]["id"]
+        session['user_role'] = resultado["data"]["tipo_usuario"]
         
     return jsonify(resultado)
 
@@ -268,6 +303,8 @@ def obtener_detalles_usuario(user_id):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/usuarios/add', methods=['POST'])
+@login_required
+@role_required(['admin'])  # tipo_usuario = 2
 def agregar_usuario():
     try:
         data = request.json
@@ -504,6 +541,8 @@ def toggle_user_status(user_id):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/reservas/<int:reserva_id>/update-status', methods=['POST'])
+@login_required
+@role_required(['empleado', 'admin'])  # tipo_usuario = 1 o 2
 def update_reservation_status(reserva_id):
     try:
         nuevo_estado = request.json.get('estado')
@@ -566,6 +605,8 @@ def update_reservation_status(reserva_id):
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/menu/add', methods=['POST'])
+@login_required
+@role_required(['admin'])  # tipo_usuario = 2
 def add_menu_item():
     try:
         data = request.json
@@ -589,6 +630,8 @@ def add_menu_item():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/api/mesas/add', methods=['POST'])
+@login_required
+@role_required(['admin'])  # tipo_usuario = 2
 def add_mesa():
     try:
         data = request.json

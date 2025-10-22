@@ -80,8 +80,8 @@
     <header class="header">
         <div class="overlay">
             <img src="{{ url_for('static', filename='assets/imgs/logoShort.PNG')}}" class="logo">
-            <h1 class="subtitle">Bienvenidos a nuestro restaurante</h1>
-            <h1 class="title">JP gourmet have restaurant</h1> 
+            <h1 class="subtitle text-center">Bienvenidos a nuestro restaurante</h1>
+            <h1 class="title text-center">JP Gourmet Home</h1>
             <a class="btn btn-primary mt-3" href="{{ url_for('login') }}">Reservar una mesa</a> 
         </div>      
     </header>
@@ -91,11 +91,14 @@
         <div class="container">
             <div class="row align-items-center">                
                 <div class="col-md-6">
-                    <h3 class="section-title">Horarios</h3>
-                    <p class="mb-1 font-weight-bold">Lunes - Viernes : <span class="font-weight-normal pl-2 text-muted">7:00 am - 8:00 pm</span></p>
-                    <p class="mb-1 font-weight-bold">Sabado - Domingo : <span class="font-weight-normal pl-2 text-muted">7:00 am - 12:00 pm</span></p>
-                    <p class="mb-1 font-weight-bold">Festivos : <span class="font-weight-normal pl-2 text-muted">7:00 am - 8:00 pm</span></p>
-                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm w-md mt-4">Reservar una mesa</a>
+                    <h3 class="section-title text-center">Horarios</h3>
+                    <p class="mb-1 font-weight-bold text-center">Lunes - Viernes : <span class="font-weight-normal pl-2 text-muted">7:00 am - 8:00 pm</span></p>
+                    <p class="mb-1 font-weight-bold text-center">Sabado - Domingo : <span class="font-weight-normal pl-2 text-muted">7:00 am - 12:00 pm</span></p>
+                    <p class="mb-1 font-weight-bold text-center">Festivos : <span class="font-weight-normal pl-2 text-muted">7:00 am - 8:00 pm</span></p>
+                    <div class="d-flex justify-content-center justify-content-md-start mt-4">
+                        <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">Reservar una mesa</a>
+                    </div>
+                    <br><br>
                 </div>
                 <div class="col-md-6">
                     <div class="row">
