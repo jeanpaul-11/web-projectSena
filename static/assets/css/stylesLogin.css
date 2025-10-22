@@ -31,7 +31,7 @@ button {
 body {
     margin: 0;
     padding: 0;
-    background: url("{{ url_for('static', filename='assets/imgs/logoShort.PNG') }}") no-repeat center center fixed;
+    background: url("../imgs/logoShort.PNG") no-repeat center center fixed;
     background-size: cover; /* Asegura que la imagen cubra toda la pantalla */
     display: flex;
     justify-content: center;

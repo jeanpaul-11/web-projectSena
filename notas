@@ -2,3 +2,11 @@
 123 contraseña postgresql
 
 psql "postgresql://postgres:CoKvcoKCwDnwHkPhtseZHIxodwIxVClM@crossover.proxy.rlwy.net:25502/railway" -f "C:\Users\Jean Paul\Desktop\sena ADSO\sena ADSO\web-projectSena\backup.sql"
+
+Server Name:    	                Railway Database (o el nombre que quieras)
+Host name/address:              	crossover.proxy.rlwy.net
+Port:	                            25502
+Maintenance database / Database:	railway
+Username:                       	postgres
+Password:                       	CoKvcoKCwDnwHkPhtseZHIxodwIxVClM
+Role:                           	(déjalo vacío)
