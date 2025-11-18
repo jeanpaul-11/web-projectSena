@@ -9,11 +9,12 @@ load_dotenv()
 class DatabaseManager:
     def __init__(self):
         self.db_config = {
-            'dbname': os.getenv('DB_NAME', 'restaurant_jp_db'),
-            'user': os.getenv('DB_USER', 'postgres'),
-            'password': os.getenv('DB_PASSWORD', ''),
-            'host': os.getenv('DB_HOST', 'localhost'),
-            'port': os.getenv('DB_PORT', '5432')
+            'dbname': os.getenv('DB_NAME'),
+            'user': os.getenv('DB_USER'),
+            'password': os.getenv('DB_PASSWORD'),
+            'host': os.getenv('DB_HOST'),
+            'port': os.getenv('DB_PORT', '5432'),
+            'sslmode': os.getenv('DB_SSLMODE', 'require') 
         }
 
     def get_connection(self):
